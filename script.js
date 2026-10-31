@@ -4,6 +4,7 @@ const worldWrap = document.querySelector(".world-wrap");
 const chapterName = document.querySelector("#chapter-name");
 const objectiveText = document.querySelector("#objective-text");
 const sceneCounter = document.querySelector("#scene-counter");
+const chapterProgress = document.querySelector("#chapter-progress");
 const interactionPrompt = document.querySelector("#interaction-prompt");
 const interactionLabel = document.querySelector("#interaction-label");
 const visualNovelStage = document.querySelector("#visual-novel-stage");
@@ -27,7 +28,8 @@ function cloneVnCharacter(identity, positionClass, label) {
 }
 const secondaryVnCharacter = cloneVnCharacter("you", "vn-character-secondary", "You");
 const familyVnCharacter = cloneVnCharacter("family", "vn-character-family", "Mom");
-const vnCharacters = [vnCharacter, secondaryVnCharacter, familyVnCharacter];
+const dadVnCharacter = cloneVnCharacter("dad", "vn-character-dad", "Dad");
+const vnCharacters = [vnCharacter, secondaryVnCharacter, familyVnCharacter, dadVnCharacter];
 const dialogue = document.querySelector("#dialogue");
 const dialogueContent = document.querySelector("#dialogue-content");
 const speakerName = document.querySelector("#speaker-name");
@@ -40,70 +42,71 @@ const healthCutscene = document.querySelector("#health-cutscene");
 const healthCutsceneStepLabel = document.querySelector("#health-cutscene-step");
 const healthCutsceneCopy = document.querySelector("#health-cutscene-copy");
 const healthCutsceneNext = document.querySelector("#health-cutscene-next");
+const audioToggle = document.querySelector("#audio-toggle");
+const textSizeToggle = document.querySelector("#text-size-toggle");
 
 const scenes = [
   {
     chapter: "THE BEGINNING",
     setting: "school",
     dialogue: [
-      { speaker: "Your friend", text: "Last bell, finally. Are you heading straight home?", mood: "happy" },
-      { speaker: "You", text: "In a minute. What’s everyone looking at?", mood: "curious" },
-      { speaker: "Your friend", text: "They’re passing around a vape. Want to try? It helps me chill.", mood: "curious" },
-      { speaker: "You", text: "I’m curious, but they’re all watching. I don’t want to look awkward.", mood: "worried" },
-      { speaker: "Your friend", text: "You don’t have to do it just because they’re looking. A lot of vapes contain nicotine, and that can be addictive.", mood: "concerned" },
-      { speaker: "Your friend", text: "It can become hard to stop once it’s part of a routine. What feels right to you?", mood: "hopeful" }
+      { speaker: "Your friend", text: "I made a joke in class and then spent the whole lesson replaying it in my head. My brain is talented like that.", mood: "worried" },
+      { speaker: "You", text: "You seem fine now. Is something going on?", mood: "concerned" },
+      { speaker: "Your friend", text: "I started vaping because it gave me something to do when I felt awkward around people. It seemed like a shortcut to calm, but now I reach for it when I’m stressed too.", mood: "sad" },
+      { speaker: "Your friend", text: "Some people here are offering one. I’m not trying to pressure you. I’m still figuring out why I say yes myself.", mood: "concerned" },
+      { speaker: "You", text: "Part of me wants to fit in. Part of me is just bored waiting around, and I don’t know what to say.", mood: "worried" },
+      { speaker: "Your friend", text: "That makes sense. You can say no, ask me to leave with you, or decide what feels right. No lecture from me.", mood: "hopeful" }
     ],
     choices: [
-      { text: "Say “no thanks” and change the subject." },
-      { text: "Try it, telling yourself it’s only once." }
+      { text: "Say “no thanks” and ask your friend to walk with you." },
+      { text: "Try it once, hoping it will make the awkward moment easier." }
     ]
   },
   {
     chapter: "THE ROUTINE",
     setting: "bedroom",
     dialogue: [
-      { speaker: "You", text: "It’s been a few weeks. I thought I’d only do it once, but now I keep reaching for it.", mood: "concerned" },
-      { speaker: "You", text: "When I’m stressed, I tell myself it’ll help me relax. Then I start thinking about it even when I hadn’t planned to.", mood: "worried" },
-      { speaker: "You", text: "I tried leaving it behind today. I felt restless and distracted. Why can’t I just stop?", mood: "sad" },
-      { speaker: "You", text: "Nicotine dependence can make stopping difficult. This isn’t a lack of willpower, and I deserve support without judgment.", mood: "hopeful" },
-      { speaker: "You", text: "I can take one small step right now. What might help me through this moment?", mood: "determined" }
+      { speaker: "You", text: "A few weeks have passed. I tried it at school once, and now I notice the thought comes back when I’m tense—or when I’m bored and scrolling alone.", mood: "concerned" },
+      { speaker: "You", text: "I keep telling myself it’s a quick reset. It doesn’t fix the assignment, the awkward conversations, or the restless feeling.", mood: "worried" },
+      { speaker: "You", text: "I don’t want this to become my automatic answer. Changing a habit can be hard, and that doesn’t mean I’m weak.", mood: "sad" },
+      { speaker: "Your friend", text: "I get it. I use it when I’m anxious, but that doesn’t mean it actually solves what made me anxious. We could try a different reset together.", mood: "hopeful" },
+      { speaker: "You", text: "I can put it away and message someone—or reach for it again because I want the restless feeling to stop now.", mood: "determined" }
     ],
     choices: [
-      { text: "Take a walk, breathe, or talk to someone you trust." },
-      { text: "Reach for the vape because it feels like quick relief." }
+      { text: "Put it away and try a short walk or message your friend." },
+      { text: "Use it again for quick relief, even though the stress is still there." }
     ]
   },
   {
     chapter: "THE PEOPLE AROUND YOU",
     setting: "home",
     dialogue: [
-      { speaker: "You", text: "Mom noticed I’d been quieter lately and asked if something was wrong.", mood: "worried" },
-      { speaker: "Mom", text: "You seem more tired than usual. I’m not angry. I just want to understand how you’re feeling.", mood: "concerned" },
-      { speaker: "Your friend", text: "That sounds like a lot to carry. You don't have to handle it alone.", mood: "concerned" },
-      { speaker: "You", text: "I’m scared she’ll be disappointed if I tell her what’s been going on.", mood: "sad" },
-      { speaker: "Mom", text: "I care about you. We can talk with a health professional together and work out what support would help.", mood: "hopeful" },
-      { speaker: "Your friend", text: "People who care about you want to help, not blame you. You can start with just one honest sentence.", mood: "hopeful" },
-      { speaker: "You", text: "Maybe I can ask Mom to sit with me while I talk to someone who knows about health.", mood: "determined" },
-      { speaker: "Your friend", text: "You can take this one step at a time. Asking for help is a strong first step.", mood: "happy" }
+      { speaker: "You", text: "Mom and Dad are at the dining table. I could tell them what’s been going on, but I’m not sure how they’ll react.", mood: "worried" },
+      { speaker: "Mom", text: "You don’t have to have the perfect words. I’ll listen first, then we can figure out what would actually help.", mood: "concerned" },
+      { speaker: "Dad", text: "I’m better at fixing a wobbly chair than talking about feelings. I’ll try not to jump straight to solutions.", mood: "hopeful" },
+      { speaker: "Your friend", text: "I joke when I’m nervous too. It’s okay if this comes out messy.", mood: "hopeful" },
+      { speaker: "You", text: "I tried vaping because of the pressure at school. Sometimes I still think about it when I’m stressed or alone.", mood: "sad" },
+      { speaker: "Mom", text: "Thank you for telling us. We’re not going to punish you for being honest. Would you like us to listen, help you find support, or give you a little time?", mood: "hopeful" },
+      { speaker: "Dad", text: "We can take it one step at a time. You get a say in what that step is.", mood: "determined" }
     ],
     choices: [
-      { text: "Tell someone you trust what’s been going on." },
-      { text: "Brush it off and keep the habit to yourself." }
+      { text: "Tell Mom and Dad honestly, and ask them to listen first." },
+      { text: "Say “I’m fine” for now and keep thinking it over alone." }
     ]
   },
   {
     chapter: "A WAY FORWARD",
     setting: "park",
     dialogue: [
-      { speaker: "You", text: "I want things to change, but quitting feels bigger than I expected.", mood: "concerned" },
-      { speaker: "Your friend", text: "You don’t have to solve it all today. We can start with one person you trust.", mood: "hopeful" },
-      { speaker: "You", text: "What if I try and it doesn’t work the first time?", mood: "worried" },
-      { speaker: "Your friend", text: "A difficult day doesn’t erase your effort. A trusted adult or health professional can help you make a plan that fits you.", mood: "hopeful" },
-      { speaker: "Your friend", text: "You deserve support, not blame. What feels like one possible next step?", mood: "determined" }
+      { speaker: "Your friend", text: "I still get anxious in a crowd. I’m trying to notice the feeling before I reach for anything, which is… a work in progress.", mood: "worried" },
+      { speaker: "You", text: "I want a plan that fits my life, not a promise that everything will be easy tomorrow.", mood: "concerned" },
+      { speaker: "Mom", text: "We can ask a health professional what support makes sense. You can change the plan if it isn’t working.", mood: "hopeful" },
+      { speaker: "Dad", text: "And if you have a difficult day, we start again without a speech or a scoreboard.", mood: "determined" },
+      { speaker: "Your friend", text: "I can come with you, or just text while you make the call. Your choice.", mood: "hopeful" }
     ],
     choices: [
-      { text: "Ask a trusted adult or health professional to help make a plan." },
-      { text: "Put off getting support and keep trying to handle it alone." }
+      { text: "Ask your parents or a health professional for a small, realistic plan." },
+      { text: "Wait for now; you’re not ready to ask for help yet." }
     ]
   }
 ];
@@ -112,7 +115,9 @@ const palette = {
   you: { skin: "#b77556", skinShade: "#965d48", hair: "#342a2b", hairLight: "#59413a", iris: "#547d9a", top: "#e89572", topShade: "#cc7458", pants: "#466572", shoes: "#f4e3bf" },
   friend: { skin: "#edbd91", skinShade: "#cf9874", hair: "#503830", hairLight: "#76503b", iris: "#649176", top: "#71957b", topShade: "#567761", pants: "#705e80", shoes: "#f6e5c7" },
   helper: { skin: "#d69b72", skinShade: "#b77b5d", hair: "#45352d", hairLight: "#695043", iris: "#9b7751", top: "#e2b15f", topShade: "#c89245", pants: "#657d71", shoes: "#f3e5c8" },
-  clinician: { skin: "#d69b72", skinShade: "#b77b5d", hair: "#45352d", hairLight: "#695043", iris: "#9b7751", top: "#d7e8e4", topShade: "#9ebbb4", pants: "#627e83", shoes: "#f3e5c8" }
+  clinician: { skin: "#d69b72", skinShade: "#b77b5d", hair: "#45352d", hairLight: "#695043", iris: "#9b7751", top: "#d7e8e4", topShade: "#9ebbb4", pants: "#627e83", shoes: "#f3e5c8" },
+  mom: { skin: "#c58f70", skinShade: "#a16d56", hair: "#49352f", hairLight: "#725447", iris: "#547d9a", top: "#82718d", topShade: "#5e526a", pants: "#766b75", shoes: "#f3e5c8" },
+  dad: { skin: "#d6a17e", skinShade: "#a9775f", hair: "#49352f", hairLight: "#725447", iris: "#547d9a", top: "#638b8a", topShade: "#456b6c", pants: "#65716f", shoes: "#f3e5c8" }
 };
 
 const keys = new Set();
@@ -122,6 +127,7 @@ let dialoguePageIndex = 0;
 let choiceAftermath = null;
 let currentDialogue = [];
 let vapingContinues = false;
+let storyChoices = createStoryChoices();
 let playing = false;
 let talking = false;
 let nearby = false;
@@ -129,6 +135,10 @@ let healthCutsceneStep = -1;
 let healthCutsceneComplete = false;
 let reaperRevealStartedAt = 0;
 let sceneCharacter = { x: 660, y: 300, type: "friend" };
+let dialogueTypingTimer = null;
+let sceneTransitionTimer = null;
+let audioMuted = false;
+let textSizeLarge = false;
 let canvasScale = 1;
 let worldHeight = 540;
 let lastFrame = 0;
@@ -140,6 +150,16 @@ let musicNoteIndex = 0;
 let musicGain = null;
 let effectsGain = null;
 let masterCompressor = null;
+
+function createStoryChoices() {
+  return {
+    triedVape: false,
+    repeatedUse: false,
+    choseCoping: false,
+    openedUp: false,
+    askedForHelp: false
+  };
+}
 
 function getCharacterScale() {
   return Math.min(960 / (worldWrap.clientWidth || 960), 3.3);
@@ -312,12 +332,15 @@ function drawBedroom() {
   roundedRect(589, h * .48, 25, 4, 2, "#694f3e");
   ellipse(603, h * .375, 4, 4, "#d8bd8b");
   drawTree(78, h * .56, .8);
+  roundedRect(64, h * .57, 28, 17, 4, "#b8755e");
+  ellipse(78, h * .57, 15, 3.5, "#d29a6f");
+  line([[67, h * .585], [89, h * .585]], "rgba(255,235,208,.42)", 1.5);
   roundedRect(91, h * .52, 48, 10, 4, "#d29a6f");
   for (let i = 0; i < 7; i += 1) drawFlower(185 + i * 95, h * .77 + (i % 2) * 13, "#f0d7a4", 3);
 }
 
-function drawHome() {
-  const h = worldHeight;
+function drawHome(height = worldHeight) {
+  const h = height;
   ctx.fillStyle = "#d5c6ac";
   ctx.fillRect(0, 0, 960, h);
   ctx.fillStyle = "#b49a7e";
@@ -336,12 +359,35 @@ function drawHome() {
   roundedRect(483, h * .29, 53, 12, 4, "#937251");
   ellipse(508, h * .27, 25, 26, "#88a276");
   ellipse(533, h * .265, 18, 20, "#75966e");
+  roundedRect(482, h * .08, 190, 62, 7, "#b18d68");
+  roundedRect(492, h * .095, 170, 45, 4, "#efe4d2");
+  roundedRect(514, h * .11, 42, 30, 2, "#c98e71");
+  roundedRect(562, h * .11, 34, 30, 2, "#829b88");
+  roundedRect(604, h * .11, 44, 30, 2, "#d5b875");
+  roundedRect(704, h * .33, 180, 95, 8, "#8d725a");
+  roundedRect(721, h * .35, 145, 8, 4, "#b48f68");
+  roundedRect(729, h * .4, 130, 7, 3, "#a9805f");
+  roundedRect(740, h * .45, 111, 7, 3, "#a9805f");
   drawTree(881, h * .54, 1.1);
-  for (let i = 0; i < 8; i += 1) drawFlower(106 + i * 103, h * .76 + (i % 2) * 10, "#f0d7a4", 3);
 }
 
-function drawHospital() {
+function drawDiningTable() {
   const h = worldHeight;
+  roundedRect(427, h * .68, 370, 18, 6, "#8a684d");
+  roundedRect(419, h * .665, 386, 15, 6, "#b78b62");
+  roundedRect(449, h * .705, 17, h * .17, 4, "#76583f");
+  roundedRect(760, h * .705, 17, h * .17, 4, "#76583f");
+  roundedRect(462, h * .638, 67, 25, 9, "#f3eee1");
+  roundedRect(676, h * .638, 67, 25, 9, "#f3eee1");
+  ellipse(494, h * .648, 11, 7, "#d6c7ae");
+  ellipse(710, h * .648, 11, 7, "#d6c7ae");
+  roundedRect(563, h * .642, 86, 13, 5, "#d9c6a9");
+  ellipse(605, h * .635, 11, 7, "#78927c");
+  line([[596, h * .634], [590, h * .62]], "#617a67", 2);
+}
+
+function drawHospital(height = worldHeight) {
+  const h = height;
   ctx.fillStyle = "#d9e8e8";
   ctx.fillRect(0, 0, 960, h);
   ctx.fillStyle = "#c8d6d3";
@@ -386,8 +432,8 @@ function drawHospital() {
   roundedRect(0, h * .52, 960, 8, 0, "#b8c9c4");
 }
 
-function drawGrimReaper() {
-  const h = worldHeight;
+function drawGrimReaper(height = worldHeight) {
+  const h = height;
   const elapsed = Math.max(0, performance.now() - reaperRevealStartedAt);
   const progress = Math.min(elapsed / 1400, 1);
   const fade = progress * progress * (3 - 2 * progress);
@@ -545,19 +591,26 @@ function drawGroundDetails() {
 
 function drawWorld() {
   if (healthCutsceneStep >= 0) {
+    const cutsceneHeight = Math.min(worldHeight, 540);
+    const cutsceneOffset = (worldHeight - cutsceneHeight) / 2;
+    ctx.fillStyle = healthCutsceneStep === 0 ? "#b49a7e" : "#c8d6d3";
+    ctx.fillRect(0, 0, 960, worldHeight);
+    ctx.save();
+    ctx.translate(0, cutsceneOffset);
     if (healthCutsceneStep === 0) {
-      drawHome();
-      drawCharacter({ x: 420, y: worldHeight * .82, type: "you", player: false, coughing: true });
-      drawCharacter({ x: 640, y: worldHeight * .82, type: "helper", player: false, concerned: true });
-      drawCharacter({ x: 785, y: worldHeight * .82, type: "friend", player: false, concerned: true });
+      drawHome(cutsceneHeight);
+      drawCharacter({ x: 420, y: cutsceneHeight * .82, type: "you", player: false, coughing: true });
+      drawCharacter({ x: 640, y: cutsceneHeight * .82, type: "helper", player: false, concerned: true });
+      drawCharacter({ x: 785, y: cutsceneHeight * .82, type: "friend", player: false, concerned: true });
     } else {
-      drawHospital();
-      if (healthCutsceneStep >= 2) drawGrimReaper();
-      drawCharacter({ x: 570, y: worldHeight * .66, type: "you", player: false, rotation: -Math.PI / 2, eyesClosed: healthCutsceneStep < 2, xEyes: healthCutsceneStep >= 2, dead: healthCutsceneStep >= 2, sad: true });
-      drawCharacter({ x: 770, y: worldHeight * .82, type: "helper", player: false, concerned: true });
-      drawCharacter({ x: 855, y: worldHeight * .82, type: "friend", player: false, concerned: true });
-      drawCharacter({ x: 665, y: worldHeight * .82, type: "clinician", player: false, concerned: true });
+      drawHospital(cutsceneHeight);
+      if (healthCutsceneStep >= 2) drawGrimReaper(cutsceneHeight);
+      drawCharacter({ x: 570, y: cutsceneHeight * .66, type: "you", player: false, rotation: -Math.PI / 2, eyesClosed: healthCutsceneStep < 2, xEyes: healthCutsceneStep >= 2, dead: healthCutsceneStep >= 2, sad: true });
+      drawCharacter({ x: 770, y: cutsceneHeight * .82, type: "helper", player: false, concerned: true });
+      drawCharacter({ x: 855, y: cutsceneHeight * .82, type: "friend", player: false, concerned: true });
+      drawCharacter({ x: 665, y: cutsceneHeight * .82, type: "clinician", player: false, concerned: true });
     }
+    ctx.restore();
     return;
   }
   const background = {
@@ -577,17 +630,30 @@ function drawWorld() {
   } else if (sceneIndex === 1) {
     sceneCharacter = { x: 760, y: worldHeight * .56, type: "bed" };
   } else if (sceneIndex === 2) {
-    sceneCharacter = { x: 650, y: worldHeight * .67, type: "friend" };
+    sceneCharacter = { x: 610, y: worldHeight * .72, type: "parents" };
   } else {
     sceneCharacter = { x: 650, y: worldHeight * .67, type: "helper" };
   }
+  drawGoalMarker();
 
   const ground = [
-    ...(sceneCharacter.type === "bed" ? [] : [{ ...sceneCharacter, player: false }]),
-    { x: player.x, y: player.y, type: "you", player: true }
+    ...(sceneCharacter.type === "bed" || sceneCharacter.type === "parents"
+      ? []
+      : [{ ...sceneCharacter, player: false, offeringVape: sceneIndex === 0 }]),
+    {
+      x: player.x,
+      y: player.y,
+      type: "you",
+      player: true,
+      vaping: vapingContinues && sceneIndex === 1 && keys.size === 0
+    }
   ].sort((a, b) => a.y - b.y);
+  if (sceneIndex === 2) {
+    drawCharacter({ x: 510, y: worldHeight * .78, type: "mom", player: false, concerned: true, sitting: true });
+    drawCharacter({ x: 710, y: worldHeight * .78, type: "dad", player: false, concerned: true, sitting: true });
+    drawDiningTable();
+  }
   ground.forEach(drawCharacter);
-  drawGoalMarker();
 }
 
 function drawGoalMarker() {
@@ -595,17 +661,26 @@ function drawGoalMarker() {
   const dx = sceneCharacter.x - player.x;
   const dy = sceneCharacter.y - player.y;
   const distance = Math.hypot(dx, dy);
-  if (distance < 75) return;
   const pulse = 1 + Math.sin(performance.now() / 190) * .1;
   const markerY = sceneCharacter.type === "bed"
     ? worldHeight * .35
     : sceneCharacter.y - 145 * 1.3 * getCharacterScale();
+  ctx.save();
+  ctx.strokeStyle = distance < 75 ? "rgba(255,244,183,.95)" : "rgba(255,251,222,.78)";
+  ctx.lineWidth = distance < 75 ? 3 : 2;
+  ctx.shadowColor = "#fff0a8";
+  ctx.shadowBlur = distance < 75 ? 22 : 12;
+  ctx.beginPath();
+  ctx.ellipse(sceneCharacter.x, markerY + 9, 22 * pulse, 10 * pulse, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+  if (distance < 75) return;
   ellipse(sceneCharacter.x, markerY, 15 * pulse, 15 * pulse, "rgba(255,251,222,.94)");
   ctx.fillStyle = "#66865c";
   ctx.font = "bold 17px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("!", sceneCharacter.x, markerY);
+  ctx.fillText("E", sceneCharacter.x, markerY);
 }
 
 function drawCharacter(person) {
@@ -638,19 +713,30 @@ function drawCharacter(person) {
   };
 
   const hipsY = -48 + bob;
-  drawLimb(-7, hipsY, 46, 9, colors.pants, legSwing, null);
-  drawLimb(7, hipsY, 46, 9, colors.pants, -legSwing, null);
-  const leftFootX = -7 - Math.sin(legSwing) * 46;
-  const rightFootX = 7 + Math.sin(legSwing) * 46;
-  const footY = hipsY + Math.cos(legSwing) * 46;
-  ellipse(leftFootX, footY + 1, 8, 3.4, colors.shoes);
-  ellipse(rightFootX, footY + 1, 8, 3.4, colors.shoes);
+  if (person.sitting) {
+    drawLimb(-7, hipsY, 25, 9, colors.pants, -.85, null);
+    drawLimb(7, hipsY, 25, 9, colors.pants, .85, null);
+    line([[-24, -23 + bob], [-5, -23 + bob]], colors.shoes, 6);
+    line([[5, -23 + bob], [24, -23 + bob]], colors.shoes, 6);
+  } else {
+    drawLimb(-7, hipsY, 46, 9, colors.pants, legSwing, null);
+    drawLimb(7, hipsY, 46, 9, colors.pants, -legSwing, null);
+    const leftFootX = -7 - Math.sin(legSwing) * 46;
+    const rightFootX = 7 + Math.sin(legSwing) * 46;
+    const footY = hipsY + Math.cos(legSwing) * 46;
+    ellipse(leftFootX, footY + 1, 8, 3.4, colors.shoes);
+    ellipse(rightFootX, footY + 1, 8, 3.4, colors.shoes);
+  }
 
   roundedRect(-15, -99 + bob, 30, 53, 9, colors.topShade);
   roundedRect(-13, -99 + bob, 26, 50, 8, colors.top);
-  if (!person.coughing) {
+  if (!person.coughing && !person.vaping && !person.offeringVape) {
     drawLimb(-13, -91 + bob, 35, 9, colors.topShade, -armSwing, colors.skin);
     drawLimb(13, -91 + bob, 35, 9, colors.topShade, armSwing, colors.skin);
+  } else if (person.vaping) {
+    drawLimb(-13, -91 + bob, 35, 9, colors.topShade, -armSwing, colors.skin);
+  } else if (person.offeringVape) {
+    drawLimb(-13, -91 + bob, 35, 9, colors.topShade, -armSwing, colors.skin);
   }
   roundedRect(-2, -95 + bob, 4, 33, 2, "rgba(255,255,255,.15)");
   line([[-7, -96 + bob], [0, -88 + bob], [7, -96 + bob]], "rgba(255,244,218,.7)", 1.5);
@@ -681,6 +767,7 @@ function drawCharacter(person) {
     line([[-15, headY - 4], [-15, headY + 10]], colors.hair, 4);
     line([[15, headY - 4], [15, headY + 10]], colors.hair, 4);
   }
+  if (person.type === "mom") ellipse(-15, headY - 15, 8, 8, colors.hair);
   line([[-7, headY - 18], [1, headY - 21], [8, headY - 19]], colors.hairLight, 1.8);
   const eyeY = headY + 1;
   const eyeHeight = blink ? 1 : 2;
@@ -713,6 +800,16 @@ function drawCharacter(person) {
   line([[-9, headY - 4], [-6, headY - (worried ? 5 : 4)]], colors.hair, 1.4);
   line([[6, headY - (worried ? 5 : 4)], [9, headY - 4]], colors.hair, 1.4);
   line([[0, headY + 3], [-1, headY + 6], [1, headY + 6]], colors.skinShade, 1);
+  if (person.type === "dad") {
+    ctx.strokeStyle = "#4d5551";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(-6, eyeY, 4, 4.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(6, eyeY, 4, 4.5, 0, 0, Math.PI * 2);
+    ctx.moveTo(-2, eyeY);
+    ctx.lineTo(2, eyeY);
+    ctx.stroke();
+  }
   if (worried) {
     ctx.strokeStyle = "#965e50";
     ctx.lineWidth = 1.5;
@@ -725,6 +822,42 @@ function drawCharacter(person) {
     ctx.beginPath();
     ctx.arc(0, headY + 10, 4, .15, Math.PI - .15);
     ctx.stroke();
+  }
+  if (person.vaping) {
+    line([[13, -91 + bob], [19, -82 + bob], [14, -74 + bob], [12, -101 + bob]], colors.topShade, 10);
+    line([[13, -91 + bob], [19, -82 + bob], [14, -74 + bob], [12, -101 + bob]], colors.top, 7);
+    ellipse(12, -101 + bob, 4, 3.5, colors.skin);
+    ctx.save();
+    ctx.translate(12, -107 + bob);
+    ctx.rotate(-.08);
+    roundedRect(-2.5, -10, 5, 20, 1.8, "#3d494a");
+    roundedRect(-1.5, -8, 3, 5, 1, "#8ca4a0");
+    roundedRect(-1.5, 6, 3, 2, 1, "#d5a96f");
+    ctx.restore();
+    const vapor = .16 + (Math.sin(performance.now() / 360) + 1) * .08;
+    ctx.save();
+    ctx.globalAlpha = vapor;
+    ctx.strokeStyle = "#f8f6ee";
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(13, -112 + bob);
+    ctx.bezierCurveTo(20, -117 + bob, 10, -122, 17, -128);
+    ctx.moveTo(18, -113 + bob);
+    ctx.bezierCurveTo(25, -118 + bob, 15, -122, 22, -127);
+    ctx.stroke();
+    ctx.restore();
+  } else if (person.offeringVape) {
+    line([[13, -91 + bob], [20, -81 + bob], [23, -68 + bob]], colors.topShade, 10);
+    line([[13, -91 + bob], [20, -81 + bob], [23, -68 + bob]], colors.top, 7);
+    ellipse(23, -68 + bob, 4, 3.5, colors.skin);
+    ctx.save();
+    ctx.translate(25, -78 + bob);
+    ctx.rotate(.12);
+    roundedRect(-2.5, -10, 5, 20, 1.8, "#3d494a");
+    roundedRect(-1.5, -8, 3, 5, 1, "#8ca4a0");
+    roundedRect(-1.5, 6, 3, 2, 1, "#d5a96f");
+    ctx.restore();
   }
   if (person.coughing) {
     line([[-13, -91 + bob], [-19, -80 + bob], [-7, -72 + bob]], colors.topShade, 9);
@@ -749,7 +882,13 @@ function updateInteraction() {
   const verticalDistance = (sceneCharacter.y - player.y) * worldWrap.clientHeight / worldHeight;
   nearby = Math.hypot(horizontalDistance, verticalDistance) < 140;
   interactionPrompt.hidden = !nearby;
-  interactionLabel.textContent = sceneCharacter.type === "bed" ? "Inspect bed" : "Talk";
+  interactionLabel.textContent = sceneCharacter.type === "bed"
+    ? "Inspect bed"
+    : sceneCharacter.type === "parents"
+      ? "Talk with Mom and Dad"
+      : sceneCharacter.type === "family"
+        ? "Talk with family"
+        : "Talk";
   if (nearby) {
     const x = sceneCharacter.x / 960 * worldWrap.clientWidth;
     const y = sceneCharacter.y / worldHeight * worldWrap.clientHeight;
@@ -782,10 +921,10 @@ function getAudioContext() {
     masterCompressor.release.value = 0.22;
     masterCompressor.connect(audioContext.destination);
     musicGain = audioContext.createGain();
-    musicGain.gain.value = 1.25;
+    musicGain.gain.value = audioMuted ? 0 : .34;
     musicGain.connect(masterCompressor);
     effectsGain = audioContext.createGain();
-    effectsGain.gain.value = 1;
+    effectsGain.gain.value = audioMuted ? 0 : 1;
     effectsGain.connect(masterCompressor);
   }
   if (audioContext.state === "suspended") audioContext.resume();
@@ -808,23 +947,23 @@ function playTone(frequency, startTime, duration, volume, waveform = "sine") {
 }
 
 function startBackgroundMusic() {
-  if (!getAudioContext() || musicTimer) return;
+  if (audioMuted || !getAudioContext() || musicTimer) return;
   const melody = [
-    261.63, 329.63, 392, 329.63,
-    293.66, 349.23, 392, 349.23,
-    261.63, 329.63, 440, 392,
-    293.66, 349.23, 392, 329.63
+    220, 261.63, 293.66, 329.63,
+    246.94, 293.66, 329.63, 293.66,
+    196, 246.94, 293.66, 329.63,
+    220, 261.63, 293.66, 261.63
   ];
-  const bassLine = [130.81, 146.83, 110, 98];
+  const bassLine = [110, 123.47, 98, 87.31];
   musicTimer = window.setInterval(() => {
     const now = audioContext.currentTime + 0.03;
     const noteIndex = musicNoteIndex % melody.length;
-    playMusicTone(melody[noteIndex], now, 1.2, 0.23);
+    playMusicTone(melody[noteIndex], now, 2.4, .045);
     if (noteIndex % 4 === 0) {
-      playMusicTone(bassLine[Math.floor(noteIndex / 4) % bassLine.length], now, 3.8, 0.11);
+      playMusicTone(bassLine[Math.floor(noteIndex / 4) % bassLine.length], now, 4.8, .025);
     }
     musicNoteIndex += 1;
-  }, 850);
+  }, 1850);
 }
 
 function playMusicTone(frequency, startTime, duration, volume) {
@@ -849,7 +988,7 @@ function playEndingSound(isHopeful) {
     musicGain.gain.cancelScheduledValues(now);
     musicGain.gain.setValueAtTime(musicGain.gain.value, now);
     musicGain.gain.linearRampToValueAtTime(0.08, now + 0.08);
-    musicGain.gain.linearRampToValueAtTime(1.25, now + 1.8);
+    musicGain.gain.linearRampToValueAtTime(audioMuted ? 0 : .34, now + 1.8);
   }
   const notes = isHopeful
     ? [
@@ -865,6 +1004,39 @@ function playEndingSound(isHopeful) {
   notes.forEach(({ frequency, delay, duration = 0.4, waveform = "triangle" }) =>
     playTone(frequency, now + delay, duration, isHopeful ? 0.1 : 0.14, waveform)
   );
+}
+
+function updateAudioControl() {
+  audioToggle.textContent = audioMuted ? "Sound off" : "Sound on";
+  audioToggle.setAttribute("aria-pressed", String(audioMuted));
+  audioToggle.setAttribute("aria-label", audioMuted ? "Turn sound on" : "Mute sound");
+  if (audioContext) {
+    const now = audioContext.currentTime;
+    musicGain.gain.cancelScheduledValues(now);
+    effectsGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setTargetAtTime(audioMuted ? 0 : .34, now, .08);
+    effectsGain.gain.setTargetAtTime(audioMuted ? 0 : 1, now, .04);
+  }
+  if (audioMuted && musicTimer) {
+    window.clearInterval(musicTimer);
+    musicTimer = null;
+  } else if (!audioMuted && playing) {
+    startBackgroundMusic();
+  }
+}
+
+function updateChapterProgress(completedChapters, isComplete = false) {
+  const progress = Math.max(0, Math.min(4, completedChapters));
+  const names = ["Introduction", "The routine", "Family conversation", "A way forward"];
+  chapterProgress.setAttribute("aria-valuenow", String(progress));
+  chapterProgress.setAttribute(
+    "aria-valuetext",
+    isComplete ? "All four chapters complete" : `${progress} of 4 chapters, ${names[progress - 1] || "Introduction"}`
+  );
+  chapterProgress.querySelectorAll(".progress-segment").forEach((segment, index) => {
+    segment.classList.toggle("is-complete", index < progress - (isComplete ? 0 : 1));
+    segment.classList.toggle("is-current", !isComplete && index === progress - 1);
+  });
 }
 
 function playHospitalGroan() {
@@ -967,23 +1139,49 @@ function openDialogue() {
   dialoguePageIndex = 0;
   choiceAftermath = null;
   currentDialogue = [...scene.dialogue];
-  if (vapingContinues && sceneIndex === 2) {
-    currentDialogue = currentDialogue.filter((page) => page.speaker !== "Mom" || !page.text.startsWith("You seem more tired"));
-    currentDialogue.splice(1, 0,
-      { speaker: "You", text: "I’ve been coughing and getting out of breath more easily. I can’t be sure what’s causing it, but it worries me.", mood: "worried", action: "coughing" },
-      { speaker: "Mom", text: "I can see you’re struggling. Let’s get medical advice today. We’ll find out what’s going on together.", mood: "concerned" },
-      { speaker: "Your friend", text: "Breathing changes deserve attention. A health professional can check what’s going on. You don’t have to face it alone.", mood: "concerned" }
-    );
-  } else if (sceneIndex === 2) {
-    currentDialogue.splice(1, 0,
-      { speaker: "You", text: "I told Mom people at school offered me a vape. She listened and helped me think of what I could say if it happens again.", mood: "hopeful" }
-    );
+  if (sceneIndex === 1 && !storyChoices.triedVape) {
+    currentDialogue[0] = {
+      speaker: "You",
+      text: "I said no at school, but I still think about how awkward that felt. I want to understand the feeling instead of making it bigger.",
+      mood: "concerned"
+    };
   }
-  if (vapingContinues && sceneIndex === 3) {
-    currentDialogue.splice(2, 0,
-      { speaker: "You", text: "At practice I start coughing and struggle to catch my breath. My friend finds an adult, and Mom comes to help me get medical care.", mood: "worried", action: "coughing" },
-      { speaker: "Mom", text: "We’re getting you checked now. I’m right here with you.", mood: "concerned" }
-    );
+  if (sceneIndex === 2) {
+    currentDialogue[4] = storyChoices.triedVape
+      ? {
+        speaker: "You",
+        text: vapingContinues
+          ? "I tried it because I felt pressure to fit in. I still reach for it when I’m stressed or alone, and I want help figuring out what to do."
+          : "I tried it once when I felt pressure to fit in. I don’t want to continue, but I’m nervous about what people will think.",
+        mood: "sad"
+      }
+      : {
+        speaker: "You",
+        text: "People offered me a vape at school. I said no, but the pressure and awkwardness stuck with me longer than I expected.",
+        mood: "worried"
+      };
+    if (vapingContinues) {
+      currentDialogue.splice(5, 0, {
+        speaker: "Mom",
+        text: "I’m glad you told us. Let’s check in with a health professional together instead of guessing what’s behind how you feel.",
+        mood: "concerned"
+      });
+    }
+  }
+  if (sceneIndex === 3) {
+    currentDialogue[1] = storyChoices.askedForHelp
+      ? {
+        speaker: "You",
+        text: "I talked with Mom and Dad. We haven’t solved everything, but I have a next step and people I can check in with.",
+        mood: "hopeful"
+      }
+      : {
+        speaker: "You",
+        text: vapingContinues
+          ? "I’m still using it sometimes. I’m not ready to promise I’ll stop today, but I could ask someone what support is available."
+          : "I’m still working out what I want to do. I don’t have to decide everything today.",
+        mood: "concerned"
+      };
   }
   visualNovelStage.dataset.setting = scene.setting;
   vnCharacters.forEach((character) => {
@@ -1003,28 +1201,31 @@ function renderDialoguePage() {
   const isLastPage = !choiceAftermath && dialoguePageIndex === dialoguePages.length - 1;
   const isPlayerSpeaking = page.speaker === "You";
   const isFamilySpeaking = page.speaker === "Mom";
+  const isDadSpeaking = page.speaker === "Dad";
   const characterMood = page.mood;
   const participants = new Set(dialoguePages.map((dialoguePage) => dialoguePage.speaker));
-  const speakerByIdentity = { you: "You", family: "Mom", friend: "Your friend" };
+  const speakerByIdentity = { you: "You", family: "Mom", dad: "Dad", friend: "Your friend" };
   const castCount = vnCharacters.filter((character) =>
     participants.has(speakerByIdentity[character.dataset.character])
   ).length;
   visualNovelStage.dataset.castCount = String(castCount);
   speakerName.textContent = page.speaker;
   vnCharacters.forEach((character) => {
-    const identity = isPlayerSpeaking ? "you" : isFamilySpeaking ? "family" : "friend";
+    const identity = isPlayerSpeaking ? "you" : isFamilySpeaking ? "family" : isDadSpeaking ? "dad" : "friend";
     const isSpeaking = character.dataset.character === identity;
     character.hidden = !participants.has(speakerByIdentity[character.dataset.character]);
     character.dataset.mood = isSpeaking ? characterMood : "neutral";
     character.dataset.speaking = String(isSpeaking);
-    character.dataset.action = isSpeaking ? (page.action || "") : "";
+    character.dataset.action = isSpeaking
+      ? (page.action || (vapingContinues && sceneIndex === 1 && dialoguePageIndex === 1 ? "vaping" : ""))
+      : "";
     character.dataset.health = character.dataset.character === "you" && vapingContinues && sceneIndex >= 1
       ? "strained"
       : "well";
     character.classList.toggle("is-speaking", isSpeaking);
     character.querySelector("svg").setAttribute(
       "aria-label",
-      `${isSpeaking ? page.speaker : character.dataset.character === "you" ? "You" : character.dataset.character === "family" ? "Mom" : "Your friend"}${isSpeaking ? `, ${characterMood}` : ""}`
+      `${isSpeaking ? page.speaker : character.dataset.character === "you" ? "You" : character.dataset.character === "family" ? "Mom" : character.dataset.character === "dad" ? "Dad" : "Your friend"}${isSpeaking ? `, ${characterMood}` : ""}`
     );
   });
 
@@ -1037,14 +1238,46 @@ function renderDialoguePage() {
     : `<div class="dialogue-actions"><button class="continue-button" type="button" aria-label="Continue dialogue" data-dialogue-next><span aria-hidden="true">→</span></button></div>`;
 
   dialogueContent.innerHTML = `
-    <p class="dialogue-copy" id="dialogue-copy">${page.text}</p>
+    <p class="dialogue-copy" id="dialogue-copy" aria-label="${page.text.replaceAll('"', "&quot;")}"></p>
     ${choices}
   `;
+  const copyElement = dialogueContent.querySelector("#dialogue-copy");
+  const characters = Array.from(page.text);
+  let visibleCharacters = 0;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.clearInterval(dialogueTypingTimer);
+  dialogueTypingTimer = null;
+  const finishTyping = () => {
+    window.clearInterval(dialogueTypingTimer);
+    dialogueTypingTimer = null;
+    copyElement.textContent = page.text;
+    copyElement.classList.remove("is-typing");
+  };
+  if (reducedMotion) {
+    finishTyping();
+  } else {
+    copyElement.classList.add("is-typing");
+    dialogueTypingTimer = window.setInterval(() => {
+      visibleCharacters = Math.min(visibleCharacters + 2, characters.length);
+      copyElement.textContent = characters.slice(0, visibleCharacters).join("");
+      if (visibleCharacters >= characters.length) {
+        window.clearInterval(dialogueTypingTimer);
+        dialogueTypingTimer = null;
+        copyElement.classList.remove("is-typing");
+      }
+    }, 18);
+  }
   dialogue.classList.toggle("has-choices", isLastPage);
   dialogue.scrollTop = 0;
   window.requestAnimationFrame(alignPortraitWithDialogue);
   const nextButton = dialogueContent.querySelector("[data-dialogue-next]");
+  if (nextButton && dialogueTypingTimer) nextButton.setAttribute("aria-label", "Show full dialogue text");
   nextButton?.addEventListener("click", () => {
+    if (dialogueTypingTimer) {
+      finishTyping();
+      nextButton.setAttribute("aria-label", "Continue dialogue");
+      return;
+    }
     if (choiceAftermath && dialoguePageIndex === choiceAftermath.length - 1) {
       choiceAftermath = null;
       advanceAfterChoice();
@@ -1072,6 +1305,8 @@ function alignPortraitWithDialogue() {
 
 function closeDialogue() {
   if (!talking) return;
+  window.clearInterval(dialogueTypingTimer);
+  dialogueTypingTimer = null;
   talking = false;
   vnCharacters.forEach((character) => {
     character.classList.remove("is-speaking");
@@ -1083,31 +1318,57 @@ function closeDialogue() {
   visualNovelStage.setAttribute("aria-hidden", "true");
   dialogue.hidden = true;
   touchControls.classList.remove("in-dialogue");
+  canvas.focus({ preventScroll: true });
   updateInteraction();
 }
 
 function selectChoice(index) {
-  if (sceneIndex <= 2) {
+  if (sceneIndex === 0) {
+    storyChoices.triedVape = index === 1;
     vapingContinues = index === 1;
-  }
-  if (sceneIndex === 3) vapingContinues = index === 1;
-  if (sceneIndex === 0 && index === 1) {
+    if (index === 1) {
+      choiceAftermath = [
+        {
+          speaker: "You",
+          text: "I try it because I feel watched. It doesn’t make the awkward moment disappear, and I’m not sure how I feel about having tried it.",
+          mood: "worried",
+          action: "vaping"
+        },
+        {
+          speaker: "Your friend",
+          text: "You don’t owe anyone a repeat performance. I’m not proud of how I started either, but I’m not here to judge you.",
+          mood: "concerned"
+        }
+      ];
+      dialoguePageIndex = 0;
+      renderDialoguePage();
+      return;
+    }
     choiceAftermath = [
       {
-        speaker: "You",
-        text: "I take a puff, telling myself it’s only once. As soon as it’s over, I start wondering if I’ll want another.",
-        mood: "worried",
-        action: "vaping"
+        speaker: "Your friend",
+        text: "Thanks for being honest. I’ll walk with you. For what it’s worth, I started because I felt anxious and wanted something to do with my hands.",
+        mood: "hopeful"
       },
       {
-        speaker: "Your friend",
-        text: "You don’t have to do that to fit in. If you’re unsure, we can walk away together.",
-        mood: "concerned"
+        speaker: "You",
+        text: "That’s a lot more complicated than I assumed. Maybe we can talk about it without either of us pretending it’s simple.",
+        mood: "determined"
       }
     ];
     dialoguePageIndex = 0;
     renderDialoguePage();
     return;
+  }
+  if (sceneIndex === 1) {
+    storyChoices.choseCoping = index === 0;
+    storyChoices.repeatedUse = index === 1;
+    if (index === 1) storyChoices.triedVape = true;
+    vapingContinues = index === 1;
+  } else if (sceneIndex === 2) {
+    storyChoices.openedUp = index === 0;
+  } else if (sceneIndex === 3) {
+    storyChoices.askedForHelp = index === 0;
   }
   advanceAfterChoice();
 }
@@ -1123,6 +1384,7 @@ function advanceAfterChoice() {
   visualNovelStage.setAttribute("aria-hidden", "true");
   dialogue.hidden = true;
   touchControls.classList.remove("in-dialogue");
+  canvas.focus({ preventScroll: true });
   sceneIndex += 1;
   if (sceneIndex >= scenes.length) {
     showEnding();
@@ -1133,29 +1395,38 @@ function advanceAfterChoice() {
 
 function startScene() {
   const scene = scenes[sceneIndex];
+  updateChapterProgress(sceneIndex + 1);
+  worldWrap.classList.add("scene-transition");
+  window.clearTimeout(sceneTransitionTimer);
+  sceneTransitionTimer = window.setTimeout(() => worldWrap.classList.remove("scene-transition"), 460);
   chapterName.textContent = scene.chapter;
   objectiveText.textContent = sceneIndex === 1
     ? "Check in with yourself"
-    : "Find " + (sceneIndex === 3 ? "your support" : "your friend");
+    : sceneIndex === 2
+      ? "Talk with your parents"
+      : "Find " + (sceneIndex === 3 ? "your support" : "your friend");
   sceneCounter.textContent = `DAY ${sceneIndex + 1}  /  04`;
   player.x = 480;
   player.y = worldHeight * .78;
   player.direction = "up";
   sceneCharacter = sceneIndex === 1
     ? { x: 760, y: worldHeight * .56, type: "bed" }
-    : { x: 650, y: worldHeight * .67, type: sceneIndex === 3 ? "helper" : "friend" };
+    : sceneIndex === 2
+      ? { x: 610, y: worldHeight * .72, type: "parents" }
+      : { x: 650, y: worldHeight * .67, type: sceneIndex === 3 ? "helper" : "friend" };
   updateInteraction();
   const messages = [
     "Your friend is waiting nearby. Walk over and say hello.",
-    "It’s been a few weeks. You’re alone in your room. Go over to the bed to reflect.",
-    "Your friend wants to talk. Go over when you’re ready.",
+    "A few weeks have passed. Go to the bed to reflect.",
+    "Mom and Dad are at the dining table. Go over when you’re ready to talk.",
     "A new day. Someone you trust is nearby."
   ];
   showToast(messages[sceneIndex]);
 }
 
 function showEnding() {
-  if (vapingContinues && !healthCutsceneComplete) {
+  const tragicRoute = storyChoices.repeatedUse && !storyChoices.openedUp && !storyChoices.askedForHelp;
+  if (tragicRoute && !healthCutsceneComplete) {
     beginHealthCutscene();
     return;
   }
@@ -1168,15 +1439,60 @@ function showEnding() {
   touchControls.hidden = true;
   touchControls.classList.remove("in-dialogue");
   sceneCounter.textContent = "YOUR NEXT CHAPTER";
-  chapterName.textContent = vapingContinues ? "A DIFFICULT CHAPTER" : "A HOPEFUL NEXT STEP";
-  objectiveText.textContent = "The story continues";
-  const hopeful = !vapingContinues;
-  playEndingSound(hopeful);
-  endingScreen.innerHTML = hopeful
-    ? `${createConfetti()}<span class="ending-tag">A hopeful next step</span><h2>You don’t have to do it alone.</h2><p>You chose steps that make room for change. Reaching out for support can help you make a plan that works for you. Recovery isn’t always a straight line, and a difficult day doesn’t erase your progress.</p><p>Consider talking with a trusted adult, school counselor, doctor, or local quit-support service. You deserve support without judgment.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`
-    : `<span class="ending-tag">A tragic fictional outcome</span><h2>The End</h2><p>His condition worsens, and he dies at the hospital despite the care team’s efforts. Mom and his friend stay close. This is a fictional worst-case ending, not a prediction or a typical outcome of vaping.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`;
+  const endingType = healthCutsceneComplete
+    ? "tragic"
+    : storyChoices.triedVape || vapingContinues
+      ? "ongoing"
+      : "hopeful";
+  chapterName.textContent = endingType === "hopeful" ? "A HOPEFUL NEXT STEP" : "A DIFFICULT CHAPTER";
+  objectiveText.textContent = "Your next step is yours to choose";
+  updateChapterProgress(4, true);
+  playEndingSound(endingType === "hopeful");
+  const endingCopy = endingType === "tragic"
+    ? {
+      tag: "A tragic fictional outcome",
+      heading: "A story’s worst-case ending",
+      text: "His condition worsens and he dies in hospital despite the care team’s efforts. His family stays close. This is a fictional dramatic outcome—not a typical result of vaping or a prediction of what will happen to someone."
+    }
+    : endingType === "ongoing"
+      ? {
+        tag: "An unfinished chapter",
+        heading: "There isn’t a tidy answer yet.",
+        text: "The habit, the pressure, or the worry hasn’t vanished overnight. There may be cravings, mixed feelings, or a difficult day ahead. What changed is that the next step can be smaller—and you don’t have to take it alone."
+      }
+      : {
+        tag: "A hopeful next step",
+        heading: "You made room for a different choice.",
+        text: "You noticed the pressure and chose a response that felt more like your own. That doesn’t make every hard moment easy; it gives you something to build on, with people who can listen without judgment."
+      };
+  endingScreen.innerHTML = `
+    ${endingType === "hopeful" ? createConfetti() : ""}
+    <div class="ending-content">
+      <span class="ending-tag">${endingCopy.tag}</span>
+      <h2>${endingCopy.heading}</h2>
+      <p>${endingCopy.text}</p>
+      <section class="what-now" aria-labelledby="what-now-title">
+        <h3 id="what-now-title">What now?</h3>
+        <ul class="resource-list">
+          <li><a href="https://www.healthhub.sg/programmes/iquit" target="_blank" rel="noopener noreferrer">Singapore HealthHub I Quit</a><span>Check eligibility and sign up for a personalised quit journey, including a 28-day SMS option and QuitLine support.</span></li>
+          <li><a href="tel:18004382000">QuitLine: 1800 438 2000</a><span>Speak with a trained advisor. Airtime charges may apply to mobile calls to 1800 numbers.</span></li>
+        </ul>
+        <h3>Talking with a friend</h3>
+        <p>Pick a private, unhurried moment. Try: “I care about you, and I’m not here to judge. Want to tell me what vaping does for you?” Listen before offering advice, ask what support they want, and offer to go with them to a trusted adult or health professional. If they aren’t ready, keep the door open.</p>
+        <p class="resource-note">If you’re under 18, consider asking a trusted adult or health professional to help you find support. HealthHub can explain current programme eligibility.</p>
+      </section>
+      <div class="ending-actions">
+        <button class="again-button" id="replay-story" type="button">Replay and try a different choice</button>
+        <button class="quiz-link" id="ending-quiz" type="button">Take the quiz</button>
+      </div>
+    </div>`;
   endingScreen.hidden = false;
-  document.querySelector("#continue-to-quiz").addEventListener("click", showQuizPage);
+  document.querySelector("#replay-story").addEventListener("click", () => {
+    resetGame();
+    document.querySelector("#start-button").focus({ preventScroll: true });
+  });
+  document.querySelector("#ending-quiz").addEventListener("click", showQuizPage);
+  document.querySelector("#replay-story").focus({ preventScroll: true });
 }
 
 function showQuizPage() {
@@ -1194,7 +1510,7 @@ function beginHealthCutscene() {
   healthCutsceneStep = 0;
   healthCutscene.hidden = false;
   healthCutsceneStepLabel.textContent = "A frightening moment";
-  healthCutsceneCopy.textContent = "After weeks of feeling worse, he starts coughing hard and struggles to catch his breath. His friend calls for help while Mom stays beside him.";
+  healthCutsceneCopy.textContent = "He suddenly struggles to breathe. His friend gets an adult, and his family calls for emergency medical help. The cause needs to be assessed by clinicians.";
   healthCutsceneNext.setAttribute("aria-label", "Continue to the hospital scene");
   healthCutsceneNext.focus({ preventScroll: true });
   sceneCounter.textContent = "A DIFFICULT CHAPTER";
@@ -1229,8 +1545,13 @@ function advanceHealthCutscene() {
 }
 
 function resetGame() {
+  window.clearInterval(dialogueTypingTimer);
+  dialogueTypingTimer = null;
+  window.clearTimeout(sceneTransitionTimer);
+  worldWrap.classList.remove("scene-transition");
   sceneIndex = -1;
   vapingContinues = false;
+  storyChoices = createStoryChoices();
   healthCutsceneStep = -1;
   healthCutsceneComplete = false;
   healthCutscene.hidden = true;
@@ -1248,6 +1569,7 @@ function resetGame() {
   chapterName.textContent = "THE BEGINNING";
   objectiveText.textContent = "Find your friend";
   sceneCounter.textContent = "PROLOGUE";
+  updateChapterProgress(0);
 }
 
 function beginGame() {
@@ -1261,7 +1583,9 @@ function beginGame() {
   touchControls.hidden = false;
   sceneIndex = 0;
   vapingContinues = false;
+  storyChoices = createStoryChoices();
   startScene();
+  canvas.focus({ preventScroll: true });
 }
 
 function gameLoop(time) {
@@ -1295,9 +1619,18 @@ function gameLoop(time) {
 
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
-  if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(key)) event.preventDefault();
-  if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(key)) keys.add(key);
-  if ((key === "e" || key === " ") && !event.repeat) openDialogue();
+  const interactiveTarget = event.target instanceof Element
+    && Boolean(event.target.closest("button, a, input, select, textarea"));
+  if (!interactiveTarget && playing && ["arrowup", "arrowdown", "arrowleft", "arrowright"].includes(key)) {
+    event.preventDefault();
+  }
+  if (!interactiveTarget && ["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(key)) {
+    keys.add(key);
+  }
+  if (key === "e" && !event.repeat && !interactiveTarget) {
+    if (talking) dialogueContent.querySelector("[data-dialogue-next]")?.click();
+    else openDialogue();
+  }
   if (key === "escape" && talking) closeDialogue();
 });
 
@@ -1309,6 +1642,16 @@ window.addEventListener("resize", () => {
 });
 document.querySelector("#start-button").addEventListener("click", beginGame);
 document.querySelector("#start-button").addEventListener("click", startBackgroundMusic);
+audioToggle.addEventListener("click", () => {
+  audioMuted = !audioMuted;
+  updateAudioControl();
+});
+textSizeToggle.addEventListener("click", () => {
+  textSizeLarge = !textSizeLarge;
+  document.body.dataset.textSize = textSizeLarge ? "large" : "standard";
+  textSizeToggle.setAttribute("aria-pressed", String(textSizeLarge));
+  textSizeToggle.textContent = textSizeLarge ? "Standard text" : "Larger text";
+});
 document.querySelector("#take-quiz-button").addEventListener("click", () => {
   if (!quizUrl) {
     showToast("Add your Kahoot or Google Forms link to enable the quiz.");

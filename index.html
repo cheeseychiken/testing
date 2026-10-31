@@ -16,7 +16,11 @@
           <span class="brand-mark">✳</span>
           <span>ONE STEP <span class="brand-light">AT A TIME</span></span>
         </a>
-        <span class="top-note">A little story game about big choices</span>
+        <div class="topbar-tools">
+          <span class="top-note">A little story game about big choices</span>
+          <button class="utility-button" id="audio-toggle" type="button" aria-pressed="false" aria-label="Mute sound">Sound on</button>
+          <button class="utility-button" id="text-size-toggle" type="button" aria-pressed="false">Larger text</button>
+        </div>
       </header>
 
       <section class="game-frame" aria-label="Interactive story game">
@@ -27,12 +31,21 @@
           </div>
           <div class="objective"><span class="objective-icon">✦</span><span id="objective-text">Find your friend</span></div>
           <div class="scene-counter" id="scene-counter">PROLOGUE</div>
+          <div class="chapter-progress" id="chapter-progress" role="progressbar" aria-label="Story progress" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" aria-valuetext="Introduction">
+            <span class="progress-label">STORY PROGRESS</span>
+            <span class="progress-track" aria-hidden="true">
+              <span class="progress-segment"></span>
+              <span class="progress-segment"></span>
+              <span class="progress-segment"></span>
+              <span class="progress-segment"></span>
+            </span>
+          </div>
         </div>
 
         <div class="world-wrap">
-          <canvas id="world" width="960" height="540" aria-label="Explore the story world. Use WASD or arrow keys to move."></canvas>
+          <canvas id="world" width="960" height="540" tabindex="0" aria-label="Explore the story world. Use WASD or arrow keys to move, then press E to interact."></canvas>
           <div class="world-vignette" aria-hidden="true"></div>
-          <div class="interaction-prompt" id="interaction-prompt" hidden>
+          <div class="interaction-prompt" id="interaction-prompt" role="status" aria-live="polite" hidden>
             <kbd>E</kbd><span id="interaction-label">Talk</span>
           </div>
           <div class="visual-novel-stage" id="visual-novel-stage" aria-hidden="true">
@@ -151,7 +164,7 @@
             <button class="start-button" id="start-button" type="button">Step inside <span aria-hidden="true">→</span></button>
             <div class="start-controls">MOVE <span>W A S D</span> OR <span>↑ ↓ ← →</span><i>·</i> INTERACT <span>E</span></div>
           </div>
-          <div class="ending-screen" id="ending-screen" hidden></div>
+          <div class="ending-screen" id="ending-screen" aria-live="polite" hidden></div>
           <div class="quiz-screen" id="quiz-screen" hidden>
             <span class="ending-tag">Story complete</span>
             <h2>Congratulations!</h2>
@@ -163,7 +176,7 @@
             <button class="touch-key left" data-dir="left" type="button" aria-label="Move left">←</button>
             <button class="touch-key down" data-dir="down" type="button" aria-label="Move down">↓</button>
             <button class="touch-key right" data-dir="right" type="button" aria-label="Move right">→</button>
-            <button class="touch-talk" id="touch-talk" type="button">TALK <span>✦</span></button>
+            <button class="touch-talk" id="touch-talk" type="button" aria-label="Interact with the nearby person or object">TALK <span>✦</span></button>
           </div>
         </div>
       </section>
