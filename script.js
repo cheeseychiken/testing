@@ -138,6 +138,7 @@ let musicTimer = null;
 let musicNoteIndex = 0;
 let musicGain = null;
 let effectsGain = null;
+let masterCompressor = null;
 
 function getCharacterScale() {
   return Math.min(960 / (worldWrap.clientWidth || 960), 3.3);
@@ -628,12 +629,19 @@ function getAudioContext() {
   if (!AudioContextClass) return null;
   if (!audioContext) {
     audioContext = new AudioContextClass();
+    masterCompressor = audioContext.createDynamicsCompressor();
+    masterCompressor.threshold.value = -12;
+    masterCompressor.knee.value = 18;
+    masterCompressor.ratio.value = 5;
+    masterCompressor.attack.value = 0.006;
+    masterCompressor.release.value = 0.22;
+    masterCompressor.connect(audioContext.destination);
     musicGain = audioContext.createGain();
-    musicGain.gain.value = 0.32;
-    musicGain.connect(audioContext.destination);
+    musicGain.gain.value = 1.25;
+    musicGain.connect(masterCompressor);
     effectsGain = audioContext.createGain();
-    effectsGain.gain.value = 0.72;
-    effectsGain.connect(audioContext.destination);
+    effectsGain.gain.value = 1;
+    effectsGain.connect(masterCompressor);
   }
   if (audioContext.state === "suspended") audioContext.resume();
   return audioContext;
@@ -657,28 +665,28 @@ function playTone(frequency, startTime, duration, volume, waveform = "sine") {
 function startBackgroundMusic() {
   if (!getAudioContext() || musicTimer) return;
   const melody = [
-    329.63, 392, 440, 392,
-    349.23, 329.63, 261.63, 329.63,
-    392, 440, 523.25, 440,
-    392, 349.23, 293.66, 349.23
+    261.63, 329.63, 392, 329.63,
+    293.66, 349.23, 392, 349.23,
+    261.63, 329.63, 440, 392,
+    293.66, 349.23, 392, 329.63
   ];
-  const bassLine = [110, 87.31, 130.81, 98];
+  const bassLine = [130.81, 146.83, 110, 98];
   musicTimer = window.setInterval(() => {
     const now = audioContext.currentTime + 0.03;
     const noteIndex = musicNoteIndex % melody.length;
-    playMusicTone(melody[noteIndex], now, 0.95, 0.045);
+    playMusicTone(melody[noteIndex], now, 1.2, 0.23);
     if (noteIndex % 4 === 0) {
-      playMusicTone(bassLine[Math.floor(noteIndex / 4) % bassLine.length], now, 2.5, 0.022);
+      playMusicTone(bassLine[Math.floor(noteIndex / 4) % bassLine.length], now, 3.8, 0.11);
     }
     musicNoteIndex += 1;
-  }, 700);
+  }, 850);
 }
 
 function playMusicTone(frequency, startTime, duration, volume) {
   if (!audioContext || !musicGain) return;
   const oscillator = audioContext.createOscillator();
   const gain = audioContext.createGain();
-  oscillator.type = "triangle";
+  oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(frequency, startTime);
   gain.gain.setValueAtTime(0.0001, startTime);
   gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.07);
@@ -696,7 +704,7 @@ function playEndingSound(isHopeful) {
     musicGain.gain.cancelScheduledValues(now);
     musicGain.gain.setValueAtTime(musicGain.gain.value, now);
     musicGain.gain.linearRampToValueAtTime(0.08, now + 0.08);
-    musicGain.gain.linearRampToValueAtTime(0.32, now + 1.8);
+    musicGain.gain.linearRampToValueAtTime(1.25, now + 1.8);
   }
   const notes = isHopeful
     ? [
