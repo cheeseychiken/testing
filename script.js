@@ -127,6 +127,7 @@ let talking = false;
 let nearby = false;
 let healthCutsceneStep = -1;
 let healthCutsceneComplete = false;
+let reaperRevealStartedAt = 0;
 let sceneCharacter = { x: 660, y: 300, type: "friend" };
 let canvasScale = 1;
 let worldHeight = 540;
@@ -260,19 +261,56 @@ function drawBedroom() {
   ctx.fillRect(0, 0, 960, h);
   ctx.fillStyle = "#b79b7d";
   ctx.fillRect(0, h * .49, 960, h * .51);
+  for (let y = h * .55; y < h; y += 34) {
+    line([[0, y], [960, y]], "rgba(110,79,57,.16)", 2);
+    for (let x = ((Math.floor(y / 34) % 2) * 112); x < 960; x += 224) {
+      line([[x, y], [x, Math.min(y + 34, h)]], "rgba(110,79,57,.12)", 1.5);
+    }
+  }
+  roundedRect(92, h * .07, 281, h * .32, 13, "#b69778");
   ctx.fillStyle = "#a8c0b9";
   roundedRect(105, h * .09, 257, Math.min(178, h * .27), 8, "#f2e4c9");
   roundedRect(118, h * .105, 231, Math.min(151, h * .235), 4, "#93b8b4");
+  roundedRect(228, h * .105, 8, Math.min(151, h * .235), 3, "#f2e4c9");
+  roundedRect(118, h * .21, 231, 7, 3, "#f2e4c9");
   ellipse(293, h * .15, 20, 20, "#f7dda0");
   line([[118, h * .32], [185, h * .22], [246, h * .32], [300, h * .25], [349, h * .31]], "#819d89", 8);
+  roundedRect(87, h * .085, 29, h * .32, 9, "#ad826e");
+  roundedRect(351, h * .085, 29, h * .32, 9, "#ad826e");
+  line([[104, h * .09], [104, h * .4]], "rgba(255,235,208,.42)", 3);
+  line([[365, h * .09], [365, h * .4]], "rgba(255,235,208,.35)", 3);
+  roundedRect(414, h * .12, 88, 65, 5, "#f0e2c9");
+  roundedRect(420, h * .13, 76, 53, 2, "#7f9e8e");
+  line([[458, h * .13], [458, h * .183]], "#f0e2c9", 3);
+  line([[420, h * .156], [496, h * .156]], "#f0e2c9", 3);
+  ellipse(433, h * .15, 4, 4, "#f2d89b");
+  ellipse(478, h * .165, 5, 5, "#d29a78");
+  roundedRect(402, h * .7, 128, 12, 4, "#85694e");
+  roundedRect(410, h * .72, 8, h * .12, 3, "#725a46");
+  roundedRect(515, h * .72, 8, h * .12, 3, "#725a46");
+  roundedRect(425, h * .66, 36, 7, 2, "#758c75");
+  roundedRect(430, h * .64, 33, 6, 2, "#d7b87f");
+  roundedRect(436, h * .62, 28, 6, 2, "#b8755e");
+  roundedRect(477, h * .65, 28, 8, 3, "#f2eadc");
+  roundedRect(487, h * .57, 8, 19, 3, "#d2a47b");
+  ellipse(491, h * .56, 14, 7, "#f3d996");
   roundedRect(632, h * .27, 260, 145, 12, "#957b63");
   roundedRect(614, h * .35, 295, 114, 18, "#668b86");
+  roundedRect(632, h * .36, 261, 20, 10, "#e1d3bb");
   roundedRect(648, h * .3, 91, 63, 12, "#f5e8d2");
   roundedRect(752, h * .31, 102, 57, 12, "#eadbbf");
+  line([[635, h * .41], [887, h * .41]], "rgba(242,230,207,.5)", 2);
+  roundedRect(626, h * .44, 271, 17, 7, "#a77a61");
+  roundedRect(879, h * .42, 16, 29, 6, "#d5b997");
   roundedRect(470, h * .32, 22, 116, 5, "#886d51");
   roundedRect(449, h * .315, 64, 13, 5, "#886d51");
   ellipse(478, h * .3, 25, 25, "#85a077");
   ellipse(500, h * .29, 19, 19, "#9aaf7d");
+  roundedRect(580, h * .39, 43, 74, 6, "#8d7256");
+  roundedRect(575, h * .385, 53, 10, 4, "#ae8a67");
+  roundedRect(585, h * .47, 33, 4, 2, "#694f3e");
+  roundedRect(589, h * .48, 25, 4, 2, "#694f3e");
+  ellipse(603, h * .375, 4, 4, "#d8bd8b");
   drawTree(78, h * .56, .8);
   roundedRect(91, h * .52, 48, 10, 4, "#d29a6f");
   for (let i = 0; i < 7; i += 1) drawFlower(185 + i * 95, h * .77 + (i % 2) * 13, "#f0d7a4", 3);
@@ -323,20 +361,21 @@ function drawHospital() {
   roundedRect(337, h * .6, 27, 105, 7, "#8da39c");
   roundedRect(273, h * .36, 82, 105, 8, "#f8f6ec");
   roundedRect(283, h * .375, 62, 62, 5, "#dce9e3");
-  const pulse = performance.now() / 120;
-  const pulseX = ((pulse % 4) / 4) * 48;
   const pulseY = h * .41;
   ctx.save();
   ctx.beginPath();
   ctx.rect(287, h * .39, 54, 25);
   ctx.clip();
-  line([[287, pulseY], [298, pulseY], [304, pulseY - 5], [309, pulseY + 9], [315, pulseY - 13], [321, pulseY + 4], [327, pulseY], [341, pulseY]], "#438f7e", 3);
+  if (healthCutsceneStep >= 2) {
+    line([[287, pulseY], [341, pulseY]], "#438f7e", 3);
+  } else {
+    line([[287, pulseY], [298, pulseY], [304, pulseY - 5], [309, pulseY + 9], [315, pulseY - 13], [321, pulseY + 4], [327, pulseY], [341, pulseY]], "#438f7e", 3);
+  }
   ctx.restore();
-  ellipse(287 + pulseX, pulseY, 3.5, 3.5, "#53b99a");
   ctx.fillStyle = "#526e68";
   ctx.font = "bold 8px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("MONITORING", 314, h * .465);
+  ctx.fillText(healthCutsceneStep >= 2 ? "ASYSTOLE" : "MONITORING", 314, h * .465);
   const alarmGlow = .55 + Math.sin(performance.now() / 180) * .35;
   ellipse(343, h * .387, 4, 4, `rgba(211, 105, 89, ${alarmGlow})`);
   roundedRect(294, h * .45, 38, 6, 3, "#e8b2a1");
@@ -347,11 +386,91 @@ function drawHospital() {
   roundedRect(0, h * .52, 960, 8, 0, "#b8c9c4");
 }
 
+function drawGrimReaper() {
+  const h = worldHeight;
+  const elapsed = Math.max(0, performance.now() - reaperRevealStartedAt);
+  const progress = Math.min(elapsed / 1400, 1);
+  const fade = progress * progress * (3 - 2 * progress);
+  ctx.save();
+  ctx.globalAlpha *= fade;
+  ctx.translate(0, (1 - fade) * 12);
+  ctx.translate(355, h * .82);
+  ctx.scale(1.05, 1.05);
+  ellipse(0, 3, 54, 9, "rgba(42,49,49,.16)");
+
+  line([[-35, 2], [-10, -184]], "#594d45", 5);
+  ctx.fillStyle = "#c8cfca";
+  ctx.beginPath();
+  ctx.moveTo(-10, -184);
+  ctx.bezierCurveTo(8, -222, 44, -228, 57, -210);
+  ctx.bezierCurveTo(33, -219, 21, -202, 12, -177);
+  ctx.closePath();
+  ctx.fill();
+  line([[11, -181], [26, -193], [40, -197]], "rgba(255,255,255,.62)", 2);
+
+  const robe = ctx.createLinearGradient(-38, -157, 36, -20);
+  robe.addColorStop(0, "#30363a");
+  robe.addColorStop(.55, "#20272c");
+  robe.addColorStop(1, "#141b20");
+  ctx.fillStyle = robe;
+  ctx.beginPath();
+  ctx.moveTo(-20, -155);
+  ctx.quadraticCurveTo(-43, -146, -48, -118);
+  ctx.lineTo(-40, -43);
+  ctx.quadraticCurveTo(-52, -15, -47, -5);
+  ctx.quadraticCurveTo(-22, -13, -7, -4);
+  ctx.quadraticCurveTo(10, -14, 28, -5);
+  ctx.quadraticCurveTo(47, -16, 49, -7);
+  ctx.lineTo(42, -113);
+  ctx.quadraticCurveTo(40, -145, 17, -155);
+  ctx.closePath();
+  ctx.fill();
+  line([[-22, -137], [-14, -77], [-26, -22]], "rgba(157,169,167,.18)", 3);
+  line([[15, -140], [8, -81], [20, -18]], "rgba(157,169,167,.14)", 3);
+
+  ctx.fillStyle = "#11171b";
+  ctx.beginPath();
+  ctx.moveTo(-28, -151);
+  ctx.quadraticCurveTo(-29, -184, 0, -194);
+  ctx.quadraticCurveTo(31, -183, 28, -151);
+  ctx.quadraticCurveTo(18, -165, 0, -164);
+  ctx.quadraticCurveTo(-16, -162, -28, -151);
+  ctx.fill();
+  ctx.fillStyle = "#b8b5a8";
+  ctx.beginPath();
+  ctx.ellipse(0, -149, 15, 20, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ellipse(-6, -152, 3.2, 4, "#25292a");
+  ellipse(6, -152, 3.2, 4, "#25292a");
+  ctx.fillStyle = "#686d69";
+  ctx.beginPath();
+  ctx.moveTo(0, -147);
+  ctx.lineTo(-3, -140);
+  ctx.lineTo(3, -140);
+  ctx.closePath();
+  ctx.fill();
+  line([[-6, -134], [-3, -132], [0, -134], [3, -132], [6, -134]], "#777b75", 1.5);
+
+  line([[-38, -118], [-52, -87], [-43, -69]], "#252c30", 10);
+  line([[-43, -69], [-46, -56], [-43, -48]], "#b8b5a8", 3);
+  line([[-43, -48], [-48, -55]], "#b8b5a8", 2);
+  line([[-43, -48], [-39, -56]], "#b8b5a8", 2);
+  ctx.restore();
+}
+
 function drawPark() {
   const h = worldHeight;
   ctx.fillStyle = "#f0cb98";
   ctx.fillRect(0, 0, 960, h);
+  ellipse(756, h * .16, 60, 60, "rgba(248,223,167,.18)");
   ellipse(756, h * .16, 60, 60, "#f8dfa7");
+  ctx.fillStyle = "rgba(255,246,220,.48)";
+  ctx.beginPath();
+  ctx.moveTo(0, h * .35);
+  ctx.bezierCurveTo(180, h * .25, 310, h * .34, 468, h * .3);
+  ctx.lineTo(468, h * .37);
+  ctx.bezierCurveTo(290, h * .4, 162, h * .34, 0, h * .42);
+  ctx.fill();
   ctx.fillStyle = "#b9c394";
   ctx.fillRect(0, h * .35, 960, h * .65);
   ctx.fillStyle = "#92ad7c";
@@ -372,14 +491,38 @@ function drawPark() {
   ctx.fill();
   line([[430, h], [490, h * .83], [535, h * .73], [602, h * .66]], "#ddc99e", 60);
   line([[430, h], [490, h * .83], [535, h * .73], [602, h * .66]], "#ebd9b2", 48);
+  line([[430, h], [490, h * .83], [535, h * .73], [602, h * .66]], "rgba(255,255,255,.3)", 2);
+  line([[0, h * .48], [960, h * .48]], "#b99a73", 3);
+  line([[0, h * .52], [960, h * .52]], "#b99a73", 3);
+  for (let x = 25; x < 960; x += 58) {
+    roundedRect(x, h * .46, 5, h * .08, 2, "#a68a67");
+  }
   drawTree(149, h * .53, 1.4, true);
   drawTree(856, h * .54, 1.12);
   drawBush(694, h * .53, 1.1);
   drawBush(384, h * .57, .85);
+  drawBush(554, h * .53, .7);
+  drawBush(85, h * .55, .72);
+  roundedRect(257, h * .49, 7, h * .14, 3, "#665d50");
+  roundedRect(247, h * .48, 27, 8, 3, "#e4d7b9");
+  roundedRect(251, h * .47, 19, 8, 3, "#f4e7c9");
+  ellipse(260, h * .47, 12, 4, "rgba(255,236,190,.45)");
   roundedRect(612, h * .73, 100, 9, 4, "#a57b55");
+  roundedRect(608, h * .71, 108, 8, 4, "#c29668");
   roundedRect(621, h * .75, 7, 26, 3, "#83654d");
   roundedRect(694, h * .75, 7, 26, 3, "#83654d");
+  line([[619, h * .78], [704, h * .78]], "#83654d", 3);
+  for (let i = 0; i < 5; i += 1) {
+    ellipse(84 + i * 19, h * .69 + (i % 2) * 5, 9, 4, "#9d8a70");
+    ellipse(815 + i * 18, h * .66 + (i % 2) * 6, 8, 4, "#a28d72");
+  }
   for (let i = 0; i < 9; i += 1) drawFlower(76 + i * 104, h * .87 + (i % 3) * 9, ["#f3d9a2", "#e8b3a0", "#fff0ce"][i % 3], 3);
+  for (let i = 0; i < 5; i += 1) {
+    const x = 650 + i * 34;
+    const y = h * .59 + (i % 2) * 8;
+    drawFlower(x, y, ["#e8b3a0", "#f4d18c", "#e7d8ed"][i % 3], 5);
+    line([[x, y + 5], [x - 2, y + 16]], "#65845f", 2);
+  }
 }
 
 function drawGroundDetails() {
@@ -409,7 +552,8 @@ function drawWorld() {
       drawCharacter({ x: 785, y: worldHeight * .82, type: "friend", player: false, concerned: true });
     } else {
       drawHospital();
-      drawCharacter({ x: 570, y: worldHeight * .66, type: "you", player: false, rotation: -Math.PI / 2, eyesClosed: false, xEyes: true, dead: true, sad: true });
+      if (healthCutsceneStep >= 2) drawGrimReaper();
+      drawCharacter({ x: 570, y: worldHeight * .66, type: "you", player: false, rotation: -Math.PI / 2, eyesClosed: healthCutsceneStep < 2, xEyes: healthCutsceneStep >= 2, dead: healthCutsceneStep >= 2, sad: true });
       drawCharacter({ x: 770, y: worldHeight * .82, type: "helper", player: false, concerned: true });
       drawCharacter({ x: 855, y: worldHeight * .82, type: "friend", player: false, concerned: true });
       drawCharacter({ x: 665, y: worldHeight * .82, type: "clinician", player: false, concerned: true });
@@ -423,8 +567,9 @@ function drawWorld() {
     park: drawPark
   };
   const ending = !playing && sceneIndex >= scenes.length;
-  (ending ? drawPark : background[scenes[sceneIndex]?.setting] || drawSchool)();
-  drawGroundDetails();
+  const setting = ending ? "park" : scenes[sceneIndex]?.setting;
+  (ending ? drawPark : background[setting] || drawSchool)();
+  if (setting === "school" || setting === "park") drawGroundDetails();
   if (ending || talking || (!playing && sceneIndex < 0)) return;
 
   if (sceneIndex === 0) {
@@ -758,6 +903,46 @@ function playHospitalGroan() {
   undertone.stop(now + 1.05);
 }
 
+function playReaperRevealSound() {
+  if (!getAudioContext() || !effectsGain) return;
+  const now = audioContext.currentTime + 0.02;
+  const wind = audioContext.createBufferSource();
+  const noise = audioContext.createBuffer(1, Math.floor(audioContext.sampleRate * 1.1), audioContext.sampleRate);
+  const samples = noise.getChannelData(0);
+  for (let i = 0; i < samples.length; i += 1) {
+    samples[i] = (Math.random() * 2 - 1) * (1 - i / samples.length);
+  }
+  wind.buffer = noise;
+  const lowPass = audioContext.createBiquadFilter();
+  lowPass.type = "lowpass";
+  lowPass.frequency.setValueAtTime(520, now);
+  lowPass.frequency.linearRampToValueAtTime(180, now + 0.85);
+  const windGain = audioContext.createGain();
+  windGain.gain.setValueAtTime(0.0001, now);
+  windGain.gain.linearRampToValueAtTime(0.055, now + 0.16);
+  windGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+  wind.connect(lowPass);
+  lowPass.connect(windGain);
+  windGain.connect(effectsGain);
+  wind.start(now);
+  wind.stop(now + 1.08);
+
+  const ghostNote = audioContext.createOscillator();
+  const ghostGain = audioContext.createGain();
+  ghostNote.type = "sine";
+  ghostNote.frequency.setValueAtTime(190, now);
+  ghostNote.frequency.exponentialRampToValueAtTime(72, now + 0.9);
+  ghostGain.gain.setValueAtTime(0.0001, now);
+  ghostGain.gain.linearRampToValueAtTime(0.04, now + 0.18);
+  ghostGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.02);
+  ghostNote.connect(ghostGain);
+  ghostGain.connect(effectsGain);
+  ghostNote.start(now);
+  ghostNote.stop(now + 1.05);
+
+  playTone(680, now + 0.78, 0.16, 0.025, "sine");
+}
+
 function createConfetti() {
   const colors = ["#f3d37a", "#e88e73", "#a9c88d", "#8dbfc0", "#f7eee0"];
   return `<div class="confetti" aria-hidden="true">${Array.from({ length: 42 }, (_, index) => {
@@ -975,7 +1160,7 @@ function showEnding() {
     return;
   }
   playing = false;
-  healthCutsceneStep = vapingContinues ? 1 : -1;
+  healthCutsceneStep = vapingContinues ? 2 : -1;
   healthCutscene.hidden = true;
   worldWrap.classList.remove("visual-novel");
   visualNovelStage.setAttribute("aria-hidden", "true");
@@ -989,7 +1174,7 @@ function showEnding() {
   playEndingSound(hopeful);
   endingScreen.innerHTML = hopeful
     ? `${createConfetti()}<span class="ending-tag">A hopeful next step</span><h2>You don’t have to do it alone.</h2><p>You chose steps that make room for change. Reaching out for support can help you make a plan that works for you. Recovery isn’t always a straight line, and a difficult day doesn’t erase your progress.</p><p>Consider talking with a trusted adult, school counselor, doctor, or local quit-support service. You deserve support without judgment.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`
-    : `<span class="ending-tag">Bad ending: Hospitalized</span><h2>The End</h2><p>He receives medical care and support from the people who care about him.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`;
+    : `<span class="ending-tag">A tragic fictional outcome</span><h2>The End</h2><p>His condition worsens, and he dies at the hospital despite the care team’s efforts. Mom and his friend stay close. This is a fictional worst-case ending, not a prediction or a typical outcome of vaping.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`;
   endingScreen.hidden = false;
   document.querySelector("#continue-to-quiz").addEventListener("click", showQuizPage);
 }
@@ -1023,6 +1208,17 @@ function advanceHealthCutscene() {
     playHospitalGroan();
     healthCutsceneStepLabel.textContent = "At the hospital";
     healthCutsceneCopy.textContent = "His breathing is being closely monitored. The care team responds while Mom and his friend stay beside him. Doctors assess his symptoms and begin care.";
+    healthCutsceneNext.setAttribute("aria-label", "Continue to the final hospital scene");
+    return;
+  }
+  if (healthCutsceneStep === 1) {
+    healthCutsceneStep = 2;
+    reaperRevealStartedAt = performance.now();
+    playReaperRevealSound();
+    chapterName.textContent = "A QUIET GOODBYE";
+    objectiveText.textContent = "His family stays by his side";
+    healthCutsceneStepLabel.textContent = "A quiet goodbye";
+    healthCutsceneCopy.textContent = "His condition worsens, and he dies despite the care team’s efforts. Mom and his friend stay close. A quiet figure appears at the bedside—grim cloak, terrible timing. This is a fictional worst-case ending, not a prediction or a typical outcome of vaping.";
     healthCutsceneNext.setAttribute("aria-label", "Continue to the ending");
     return;
   }
