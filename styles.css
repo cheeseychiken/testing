@@ -696,6 +696,29 @@ button { -webkit-tap-highlight-color: transparent; }
 .start-screen > *, .ending-screen > *, .quiz-screen > * { position: relative; }
 .quiz-screen { z-index: 8; }
 
+.ending-screen > .confetti {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti i {
+  position: absolute;
+  top: -8%;
+  left: var(--left);
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--color);
+  opacity: 0;
+  animation: confetti-fall var(--duration) var(--delay) ease-in infinite;
+}
+
+.confetti i:nth-child(3n) { width: 7px; height: 7px; border-radius: 50%; }
+.confetti i:nth-child(3n + 1) { transform: rotate(25deg); }
+
 .start-art {
   position: relative;
   width: 150px;
@@ -821,6 +844,16 @@ button { -webkit-tap-highlight-color: transparent; }
 @keyframes arm-gesture {
   from { transform: rotate(0deg); }
   to { transform: rotate(-3deg); }
+}
+
+@keyframes confetti-fall {
+  0% { opacity: 0; transform: translate3d(0, -10px, 0) rotate(0deg); }
+  10% { opacity: .9; }
+  100% { opacity: 0; transform: translate3d(28px, 115vh, 0) rotate(540deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti i { animation-duration: .01ms; }
 }
 
 @media (max-width: 650px) {

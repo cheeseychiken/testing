@@ -103,8 +103,7 @@ const scenes = [
     ],
     choices: [
       { text: "Ask a trusted adult or health professional to help make a plan." },
-      { text: "Try to manage it on your own, one day at a time." },
-      { text: "Decide not to think about it for now." }
+      { text: "Put off getting support and keep trying to handle it alone." }
     ]
   }
 ];
@@ -134,6 +133,11 @@ let worldHeight = 540;
 let lastFrame = 0;
 let toastTimer;
 const quizUrl = "";
+let audioContext = null;
+let musicTimer = null;
+let musicNoteIndex = 0;
+let musicGain = null;
+let effectsGain = null;
 
 function getCharacterScale() {
   return Math.min(960 / (worldWrap.clientWidth || 960), 3.3);
@@ -619,6 +623,144 @@ function showToast(message) {
   toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 1800);
 }
 
+function getAudioContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  if (!audioContext) {
+    audioContext = new AudioContextClass();
+    musicGain = audioContext.createGain();
+    musicGain.gain.value = 0.32;
+    musicGain.connect(audioContext.destination);
+    effectsGain = audioContext.createGain();
+    effectsGain.gain.value = 0.72;
+    effectsGain.connect(audioContext.destination);
+  }
+  if (audioContext.state === "suspended") audioContext.resume();
+  return audioContext;
+}
+
+function playTone(frequency, startTime, duration, volume, waveform = "sine") {
+  if (!audioContext || !effectsGain) return;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  oscillator.type = waveform;
+  oscillator.frequency.setValueAtTime(frequency, startTime);
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.04);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  oscillator.connect(gain);
+  gain.connect(effectsGain);
+  oscillator.start(startTime);
+  oscillator.stop(startTime + duration + 0.03);
+}
+
+function startBackgroundMusic() {
+  if (!getAudioContext() || musicTimer) return;
+  const melody = [
+    329.63, 392, 440, 392,
+    349.23, 329.63, 261.63, 329.63,
+    392, 440, 523.25, 440,
+    392, 349.23, 293.66, 349.23
+  ];
+  const bassLine = [110, 87.31, 130.81, 98];
+  musicTimer = window.setInterval(() => {
+    const now = audioContext.currentTime + 0.03;
+    const noteIndex = musicNoteIndex % melody.length;
+    playMusicTone(melody[noteIndex], now, 0.95, 0.045);
+    if (noteIndex % 4 === 0) {
+      playMusicTone(bassLine[Math.floor(noteIndex / 4) % bassLine.length], now, 2.5, 0.022);
+    }
+    musicNoteIndex += 1;
+  }, 700);
+}
+
+function playMusicTone(frequency, startTime, duration, volume) {
+  if (!audioContext || !musicGain) return;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  oscillator.type = "triangle";
+  oscillator.frequency.setValueAtTime(frequency, startTime);
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.07);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  oscillator.connect(gain);
+  gain.connect(musicGain);
+  oscillator.start(startTime);
+  oscillator.stop(startTime + duration + 0.03);
+}
+
+function playEndingSound(isHopeful) {
+  if (!getAudioContext()) return;
+  const now = audioContext.currentTime + 0.04;
+  if (musicGain) {
+    musicGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+    musicGain.gain.linearRampToValueAtTime(0.08, now + 0.08);
+    musicGain.gain.linearRampToValueAtTime(0.32, now + 1.8);
+  }
+  const notes = isHopeful
+    ? [
+      { frequency: 523.25, delay: 0 },
+      { frequency: 659.25, delay: 0.14 },
+      { frequency: 783.99, delay: 0.28 }
+    ]
+    : [
+      { frequency: 392, delay: 0, duration: 0.26, waveform: "square" },
+      { frequency: 311.13, delay: 0.22, duration: 0.28, waveform: "square" },
+      { frequency: 233.08, delay: 0.48, duration: 0.55, waveform: "triangle" }
+    ];
+  notes.forEach(({ frequency, delay, duration = 0.4, waveform = "triangle" }) =>
+    playTone(frequency, now + delay, duration, isHopeful ? 0.1 : 0.14, waveform)
+  );
+}
+
+function playHospitalGroan() {
+  if (!getAudioContext() || !effectsGain) return;
+  const now = audioContext.currentTime + 0.12;
+  const voice = audioContext.createOscillator();
+  const voiceGain = audioContext.createGain();
+  const filter = audioContext.createBiquadFilter();
+  voice.type = "sawtooth";
+  voice.frequency.setValueAtTime(158, now);
+  voice.frequency.linearRampToValueAtTime(126, now + 0.85);
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(360, now);
+  filter.Q.setValueAtTime(1.2, now);
+  voiceGain.gain.setValueAtTime(0.0001, now);
+  voiceGain.gain.linearRampToValueAtTime(0.035, now + 0.16);
+  voiceGain.gain.setValueAtTime(0.028, now + 0.5);
+  voiceGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+  voice.connect(filter);
+  filter.connect(voiceGain);
+  voiceGain.connect(effectsGain);
+  voice.start(now);
+  voice.stop(now + 1.08);
+
+  const undertone = audioContext.createOscillator();
+  const undertoneGain = audioContext.createGain();
+  undertone.type = "sine";
+  undertone.frequency.setValueAtTime(79, now);
+  undertone.frequency.linearRampToValueAtTime(63, now + 0.9);
+  undertoneGain.gain.setValueAtTime(0.0001, now);
+  undertoneGain.gain.linearRampToValueAtTime(0.018, now + 0.2);
+  undertoneGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.02);
+  undertone.connect(undertoneGain);
+  undertoneGain.connect(effectsGain);
+  undertone.start(now);
+  undertone.stop(now + 1.05);
+}
+
+function createConfetti() {
+  const colors = ["#f3d37a", "#e88e73", "#a9c88d", "#8dbfc0", "#f7eee0"];
+  return `<div class="confetti" aria-hidden="true">${Array.from({ length: 42 }, (_, index) => {
+    const left = (index * 47 + 13) % 100;
+    const delay = ((index * 17) % 30) / 10;
+    const duration = 3.2 + ((index * 13) % 20) / 10;
+    const color = colors[index % colors.length];
+    return `<i style="--left:${left}%;--delay:${delay}s;--duration:${duration}s;--color:${color}"></i>`;
+  }).join("")}</div>`;
+}
+
 function openDialogue() {
   if (!playing) return;
   if (!nearby) {
@@ -755,7 +897,7 @@ function selectChoice(index) {
   if (sceneIndex <= 2) {
     vapingContinues = index === 1;
   }
-  if (sceneIndex === 3 && index < 2) vapingContinues = false;
+  if (sceneIndex === 3) vapingContinues = index === 1;
   if (sceneIndex === 0 && index === 1) {
     choiceAftermath = [
       {
@@ -836,9 +978,10 @@ function showEnding() {
   chapterName.textContent = vapingContinues ? "A DIFFICULT CHAPTER" : "A HOPEFUL NEXT STEP";
   objectiveText.textContent = "The story continues";
   const hopeful = !vapingContinues;
+  playEndingSound(hopeful);
   endingScreen.innerHTML = hopeful
-    ? `<span class="ending-tag">A hopeful next step</span><h2>You don’t have to do it alone.</h2><p>You chose steps that make room for change. Reaching out for support can help you make a plan that works for you. Recovery isn’t always a straight line, and a difficult day doesn’t erase your progress.</p><p>Consider talking with a trusted adult, school counselor, doctor, or local quit-support service. You deserve support without judgment.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`
-    : `<span class="ending-tag">Bad ending: Died in the hospital</span><h2>You died.</h2><p>The strain became too much, and the hospital could not save you. Your story ends here, after a long and painful struggle with nicotine.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`;
+    ? `${createConfetti()}<span class="ending-tag">A hopeful next step</span><h2>You don’t have to do it alone.</h2><p>You chose steps that make room for change. Reaching out for support can help you make a plan that works for you. Recovery isn’t always a straight line, and a difficult day doesn’t erase your progress.</p><p>Consider talking with a trusted adult, school counselor, doctor, or local quit-support service. You deserve support without judgment.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`
+    : `<span class="ending-tag">Bad ending: Hospitalized</span><h2>The End</h2><p>He receives medical care and support from the people who care about him.</p><button class="again-button" id="continue-to-quiz" type="button">Continue</button>`;
   endingScreen.hidden = false;
   document.querySelector("#continue-to-quiz").addEventListener("click", showQuizPage);
 }
@@ -869,8 +1012,9 @@ function beginHealthCutscene() {
 function advanceHealthCutscene() {
   if (healthCutsceneStep === 0) {
     healthCutsceneStep = 1;
+    playHospitalGroan();
     healthCutsceneStepLabel.textContent = "At the hospital";
-    healthCutsceneCopy.textContent = "His breathing is being closely monitored. The care team responds while Mom and his friend stay beside him, but the damage is already severe. His eyes are fixed, and the room falls silent as he slips away.";
+    healthCutsceneCopy.textContent = "His breathing is being closely monitored. The care team responds while Mom and his friend stay beside him. Doctors assess his symptoms and begin care.";
     healthCutsceneNext.setAttribute("aria-label", "Continue to the ending");
     return;
   }
@@ -960,6 +1104,7 @@ window.addEventListener("resize", () => {
   alignPortraitWithDialogue();
 });
 document.querySelector("#start-button").addEventListener("click", beginGame);
+document.querySelector("#start-button").addEventListener("click", startBackgroundMusic);
 document.querySelector("#take-quiz-button").addEventListener("click", () => {
   if (!quizUrl) {
     showToast("Add your Kahoot or Google Forms link to enable the quiz.");
