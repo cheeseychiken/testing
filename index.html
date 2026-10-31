@@ -1,498 +1,174 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Attention Monitor</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%); min-height:100vh; padding:10px; color:#333; }
-  .container { max-width:1200px; margin:0 auto; background:#fff; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; }
-  .header { background:linear-gradient(135deg,#5e35b1 0%,#7e57c2 100%); color:#fff; padding:20px 25px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
-  .header h1 { font-size:22px; } .header p { font-size:13px; opacity:.9; }
-  .session-status { background:rgba(255,255,255,.2); padding:8px 18px; border-radius:20px; font-size:13px; font-weight:bold; }
-  .session-status.active { background:#4caf50; }
-  .setup-box { background:#fff3cd; border:2px solid #ffc107; border-radius:10px; padding:18px; margin:18px; }
-  .setup-box label { display:block; font-size:12px; font-weight:bold; margin-bottom:4px; color:#856404; }
-  .setup-box input, .setup-box select { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-bottom:10px; font-size:13px; }
-  .main-grid { display:grid; grid-template-columns:2fr 1fr; gap:0; }
-  .camera-section { position:relative; background:#000; aspect-ratio:4/3; }
-  video, canvas { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
-  video { display:none; }
-  .placeholder { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; text-align:center; }
-  .score-panel { position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,.7); color:#fff; padding:10px 14px; border-radius:8px; font-family:monospace; font-size:12px; }
-  .score-panel .big { font-size:28px; font-weight:bold; }
-  .sidebar { background:#f5f5f5; padding:18px; overflow-y:auto; max-height:calc(100vh - 220px); }
-  .stats-card { background:#fff; border-radius:10px; padding:14px; margin-bottom:14px; box-shadow:0 2px 5px rgba(0,0,0,.1); }
-  .stats-card h3 { font-size:13px; color:#666; margin-bottom:10px; text-transform:uppercase; }
-  .stat-item { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee; font-size:13px; }
-  .stat-item:last-child { border-bottom:none; }
-  .stat-value { font-weight:bold; }
-  .ok{color:#4caf50;} .warn{color:#ff9800;} .bad{color:#f44336;}
-  .bar-track { width:100%; height:14px; background:#e0e0e0; border-radius:7px; overflow:hidden; margin-top:6px; }
-  .bar-fill { height:100%; background:linear-gradient(90deg,#f44336,#ff9800,#4caf50); transition:width .4s; }
-  .log-entry { padding:7px; margin:4px 0; border-left:3px solid #ddd; background:#fafafa; border-radius:3px; font-size:11px; }
-  .log-entry.bad{border-left-color:#f44336;background:#ffebee;} .log-entry.warn{border-left-color:#ff9800;background:#fff3e0;} .log-entry.ok{border-left-color:#4caf50;background:#e8f5e9;}
-  .log-time{font-size:9px;color:#999;}
-  .controls { padding:18px; background:#fafafa; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .btn { padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
-  .btn-start{background:#4caf50;color:#fff;grid-column:1/-1;} .btn-stop{background:#f44336;color:#fff;grid-column:1/-1;}
-  .btn-secondary{background:#e0e0e0;color:#333;} .btn:disabled{opacity:.5;cursor:not-allowed;}
-  @media (max-width:768px){ .main-grid{grid-template-columns:1fr;} .controls{grid-template-columns:1fr;} }
-</style>
-</head>
-<body>
-<div class="container">
-  <div class="header">
-    <div><h1>🎯 Student Attention Monitor</h1><p>Posture · Eyes · Head · Mouse · Keyboard · Scroll</p></div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <div class="session-status" id="extensionStatus" style="background:rgba(255,255,255,.15)">🔌 Checking extension…</div>
-      <div class="session-status" id="sessionStatus">Inactive</div>
-    </div>
-  </div>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#183c38">
+    <meta name="description" content="Explore an interactive story about vaping, choices, and support.">
+    <title>One Step at a Time — An Interactive Story</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="game-page">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="One Step at a Time home">
+          <span class="brand-mark">✳</span>
+          <span>ONE STEP <span class="brand-light">AT A TIME</span></span>
+        </a>
+        <span class="top-note">A little story game about big choices</span>
+      </header>
 
-  <div class="setup-box" id="setupBox">
-    <p style="margin-bottom:10px;color:#856404;font-size:13px">This page runs entirely in your browser (GitHub Pages), so camera access isn't blocked by Apps Script's iframe sandbox. Landmark detection runs locally; only periodic scores are sent to Google Sheets. When you stop the session, the overall score and feedback are written back to that student's row in the Students tab.</p>
-    <label>Student</label>
-    <select id="studentSelect"><option value="">Loading students…</option></select>
-    <button class="btn btn-secondary" id="requestCameraBtn" style="width:100%" disabled>📷 Request Camera Access</button>
-  </div>
+      <section class="game-frame" aria-label="Interactive story game">
+        <div class="game-hud">
+          <div class="chapter-chip">
+            <span class="chapter-dot"></span>
+            <span id="chapter-name">THE BEGINNING</span>
+          </div>
+          <div class="objective"><span class="objective-icon">✦</span><span id="objective-text">Find your friend</span></div>
+          <div class="scene-counter" id="scene-counter">PROLOGUE</div>
+        </div>
 
-  <div class="main-grid">
-    <div class="camera-section">
-      <video id="video" autoplay playsinline muted></video>
-      <canvas id="overlay"></canvas>
-      <div class="placeholder" id="placeholder"><h2>📷</h2><p>Camera not active</p></div>
-      <div class="score-panel" id="scorePanel">
-        <div>Attention: <span class="big" id="scoreVal">--</span></div>
-        <div>Head: <span id="headStatus">--</span> | Eyes: <span id="eyeStatus">--</span> | Posture: <span id="postureStatus">--</span></div>
-        <div>Idle: <span id="idleStatus">--</span>s</div>
-      </div>
-    </div>
-    <div class="sidebar">
-      <div class="stats-card">
-        <h3>Live Attention</h3>
-        <div class="bar-track"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
-      </div>
-      <div class="stats-card">
-        <h3>Session Stats</h3>
-        <div class="stat-item"><span>Checks</span><span class="stat-value" id="totalChecks">0</span></div>
-        <div class="stat-item"><span>Distracted events</span><span class="stat-value bad" id="distractedCount">0</span></div>
-        <div class="stat-item"><span>No face</span><span class="stat-value warn" id="noFaceCount">0</span></div>
-        <div class="stat-item"><span>Poor posture</span><span class="stat-value warn" id="postureCount">0</span></div>
-        <div class="stat-item"><span>Clicks</span><span class="stat-value" id="clickCount">0</span></div>
-        <div class="stat-item"><span>Keystrokes</span><span class="stat-value" id="keyCount">0</span></div>
-        <div class="stat-item"><span>Scrolls</span><span class="stat-value" id="scrollCount">0</span></div>
-        <div class="stat-item"><span>Avg attention</span><span class="stat-value ok" id="avgScore">--</span></div>
-      </div>
-      <div class="stats-card">
-        <h3>Event Log</h3>
-        <div id="eventLog" style="max-height:260px;overflow-y:auto"><div class="log-entry ok"><div>Ready.</div></div></div>
-      </div>
-    </div>
-  </div>
+        <div class="world-wrap">
+          <canvas id="world" width="960" height="540" aria-label="Explore the story world. Use WASD or arrow keys to move."></canvas>
+          <div class="world-vignette" aria-hidden="true"></div>
+          <div class="interaction-prompt" id="interaction-prompt" hidden>
+            <kbd>E</kbd><span id="interaction-label">Talk</span>
+          </div>
+          <div class="visual-novel-stage" id="visual-novel-stage" aria-hidden="true">
+            <svg class="vn-background vn-background-school" viewBox="0 0 960 540" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="960" height="540" fill="#eee9df"/>
+              <path d="M0 430h960v110H0z" fill="#d5c5b0"/>
+              <path d="M0 425h960v7H0z" fill="#c3b39f"/>
+              <rect x="82" y="82" width="246" height="222" rx="8" fill="#fbf8f0"/>
+              <rect x="94" y="94" width="222" height="198" rx="3" fill="#d6e3dc"/>
+              <path d="M205 94v198M94 193h222" stroke="#fbf8f0" stroke-width="9"/>
+              <rect x="636" y="112" width="236" height="166" rx="8" fill="#9eaf9d"/>
+              <rect x="648" y="124" width="212" height="142" rx="3" fill="#aab9a6"/>
+              <path d="M670 153h84m-84 19h144m-144 19h110" stroke="#d7dfd1" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+            <figure class="vn-portrait vn-character" id="vn-character">
+              <svg id="character-portrait" viewBox="0 0 320 520" role="img" aria-label="Your friend">
+                <path class="friend-shirt-shadow" d="M63 520v-113c0-39 19-63 56-78l39-16h24l39 16c37 15 56 39 56 78v113z" fill="#526e69"/>
+                <path class="friend-shirt" d="M87 520V409c0-28 14-46 40-57l21-9 12 21 12-21 21 9c26 11 40 29 40 57v111z" fill="#78977f"/>
+                <path class="character-neck" d="M143 270h34v74h-34z" fill="#b97e5f"/>
+                <path d="m139 321 21 25 21-25 9 4-11 23h-38l-11-23z" fill="#f5f0e5"/>
+                <path d="M160 355v99" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="3"/>
+                <g class="vn-arms">
+                  <g class="vn-resting-arm">
+                    <path class="vn-arm-outline" d="M103 350C99 380 115 420 148 450" fill="none" stroke="#526e69" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path class="vn-arm-fill" d="M103 350C99 380 115 420 148 450" fill="none" stroke="#78977f" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+                    <ellipse class="character-hand" cx="151" cy="452" rx="8" ry="5" fill="#d4a27e"/>
+                  </g>
+                  <g class="vn-gesture-arm">
+                    <path class="vn-arm-outline" d="M217 350C221 380 205 420 172 450" fill="none" stroke="#526e69" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path class="vn-arm-fill" d="M217 350C221 380 205 420 172 450" fill="none" stroke="#78977f" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+                    <ellipse class="character-hand" cx="169" cy="452" rx="8" ry="5" fill="#d4a27e"/>
+                  </g>
+                </g>
+                <g class="vape-action-arm" aria-hidden="true">
+                  <path d="M217 350C211 327 199 309 184 291" fill="none" stroke="#873d43" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path class="vape-sleeve" d="M217 350C211 327 199 309 184 291" fill="none" stroke="#c94b4b" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M184 291C176 278 169 261 166 243" fill="none" stroke="#bd8268" stroke-width="13" stroke-linecap="round"/>
+                </g>
+                <path d="M48 457h224q4 0 4 4H44q0-4 4-4z" fill="#c6a889"/>
+                <path d="M45 461h230q-2 7-10 8H55q-8-1-10-8z" fill="#987b61"/>
+                <g class="character-head" transform="translate(0 18) scale(.76 .88)">
+                  <path class="character-skin" d="M83 146c0-63 34-103 77-103s77 40 77 103v60c0 59-35 101-77 101s-77-42-77-101z" fill="#d4a27e"/>
+                  <path class="character-hair character-hair-friend" d="M81 164c-13-83 22-133 82-133 66 0 91 54 77 130l-14 17-8-69c-35 20-76 16-104-6-5 25-16 43-31 56z" fill="#493b37"/>
+                  <path class="character-hair character-hair-family" d="M81 164c-13-83 22-133 82-133 66 0 91 54 77 130l-14 17-8-69c-35 20-76 16-104-6-5 25-16 43-31 56zm4-10c-9 42-7 81 2 116l12 13c-10-47-7-84-5-119zm149 0c9 42 7 81-2 116l-12 13c10-47 7-84 5-119z"/>
+                  <path class="character-hair character-hair-you" d="M81 164c-13-83 22-133 82-133 61 0 87 48 78 119l-20-15-11-43c-20 22-45 31-73 27-12 20-30 34-53 45z" fill="#343a39"/>
+                  <path class="hair-detail hair-detail-friend" d="M105 99c17-34 46-49 78-49m-22-9c25 4 43 17 55 38" fill="none" stroke="#665149" stroke-width="9" stroke-linecap="round"/>
+                  <path class="hair-detail hair-detail-you" d="M107 80q24-32 58-33m-8 3q29-8 53 12" fill="none" stroke="#525c59" stroke-width="8" stroke-linecap="round"/>
+                  <path class="friend-locks" d="M87 176c-9 24-8 58 2 80m144-80c9 24 8 58-2 80" fill="none" stroke="#493b37" stroke-width="15" stroke-linecap="round"/>
+                  <g class="character-eyes">
+                    <path class="character-brow brow-neutral" d="M116 174q14-8 28 0m22 0q14-8 28 0"/>
+                    <path class="character-brow brow-curious" d="M116 173q14-12 28-1m22-1q14-8 28 2"/>
+                    <path class="character-brow brow-concerned" d="M116 172q14 1 28 8m22 0q14-7 28-8"/>
+                    <path class="character-brow brow-worried" d="M116 177q14-12 28-3m22-3q14-9 28 3"/>
+                    <path class="character-brow brow-sad" d="M116 171q14 2 28 9m22 0q14-7 28-9"/>
+                    <path class="character-brow brow-hopeful" d="M116 173q14-9 28-1m22-1q14-8 28 1"/>
+                    <path class="character-brow brow-happy" d="M116 176q14-12 28-4m22-1q14-7 28 4"/>
+                    <ellipse cx="132" cy="188" rx="5" ry="6" fill="#413632"/>
+                    <ellipse cx="188" cy="188" rx="5" ry="6" fill="#413632"/>
+                    <path class="eye-blink" d="M124 188q8 6 16 0m40 0q8 6 16 0" fill="none" stroke="#a97860" stroke-width="6" stroke-linecap="round"/>
+                  </g>
+                  <g class="family-glasses" fill="none" stroke="#554b48" stroke-width="3">
+                    <circle cx="132" cy="186" r="13"/>
+                    <circle cx="188" cy="186" r="13"/>
+                    <path d="M145 185q7-5 15 0m28 0h8"/>
+                  </g>
+                  <path class="health-eye-shadow" d="M122 198q10 6 20 1m36 0q10 5 20-1" fill="none" stroke="#8c645a" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M157 191q-2 12 4 14" fill="none" stroke="#b17b61" stroke-width="3" stroke-linecap="round"/>
+                  <g class="character-mouth">
+                    <path class="friend-mouth friend-mouth-neutral" d="M148 226q12 3 24 0"/>
+                    <path class="friend-mouth friend-mouth-thinking" d="M148 229q12-7 24 0"/>
+                    <path class="friend-mouth friend-mouth-concerned" d="M148 230q12-5 24 0"/>
+                    <path class="friend-mouth friend-mouth-happy" d="M145 222q15 14 30 0"/>
+                    <path class="friend-mouth friend-mouth-sad" d="M148 233q12-9 24 0"/>
+                    <path class="friend-mouth friend-mouth-hopeful" d="M148 226q12 7 24 0"/>
+                    <path class="friend-mouth friend-mouth-curious" d="M148 226q12 1 24 0"/>
+                    <ellipse class="mouth-open" cx="160" cy="227" rx="6" ry="2" fill="#8f5c50"/>
+                  </g>
+                  <path d="M111 210q9 5 17 0m64 0q8 5 17 0" fill="none" stroke="#c98978" stroke-width="5" stroke-linecap="round" opacity=".35"/>
+                </g>
+                <g class="vape-device" aria-hidden="true">
+                  <ellipse class="character-hand" cx="166" cy="239" rx="8" ry="7"/>
+                  <rect x="162" y="215" width="9" height="27" rx="3" fill="#435a58" stroke="#f3eee1" stroke-width="2" transform="rotate(-8 166.5 228.5)"/>
+                  <path d="M164 220h5" stroke="#e9b86c" stroke-width="2" stroke-linecap="round" transform="rotate(-8 166.5 228.5)"/>
+                </g>
+                <g class="vape-puff" fill="none" stroke="#fffaf0" stroke-linecap="round" stroke-width="3" aria-hidden="true">
+                  <path d="M158 210q-8-7 0-13t0-13"/>
+                  <path d="M174 208q8-7 1-13t1-13"/>
+                </g>
+                <g class="health-cough-arm" aria-hidden="true">
+                  <path d="M103 350C92 320 103 279 133 244" fill="none" stroke="#873d43" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path class="health-cough-sleeve" d="M103 350C92 320 103 279 133 244" fill="none" stroke="#c94b4b" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+                  <ellipse class="character-hand" cx="137" cy="239" rx="9" ry="7"/>
+                </g>
+              </svg>
+            </figure>
+          </div>
+          <div class="toast" id="toast" aria-live="polite"></div>
+          <section class="health-cutscene" id="health-cutscene" aria-live="polite" hidden>
+            <div class="health-cutscene-card">
+              <p class="health-cutscene-step" id="health-cutscene-step"></p>
+              <p class="health-cutscene-copy" id="health-cutscene-copy"></p>
+              <button class="continue-button" id="health-cutscene-next" type="button" aria-label="Continue scene">→</button>
+            </div>
+          </section>
+          <div class="dialogue" id="dialogue" hidden>
+            <div class="dialogue-heading">
+              <h2 class="speaker-name" id="speaker-name">Your friend</h2>
+            </div>
+            <div id="dialogue-content"></div>
+          </div>
+          <div class="start-screen" id="start-screen">
+            <div class="start-art" aria-hidden="true"><span class="start-sun"></span><span class="start-person">☺</span><span class="start-plant">✿</span></div>
+            <span class="start-kicker">A SMALL STORY GAME</span>
+            <h1>One step at a time.</h1>
+            <p>Walk through a story about vaping, the people it affects, and the small steps that can help.</p>
+            <button class="start-button" id="start-button" type="button">Step inside <span aria-hidden="true">→</span></button>
+            <div class="start-controls">MOVE <span>W A S D</span> OR <span>↑ ↓ ← →</span><i>·</i> INTERACT <span>E</span></div>
+          </div>
+          <div class="ending-screen" id="ending-screen" hidden></div>
+          <div class="quiz-screen" id="quiz-screen" hidden>
+            <span class="ending-tag">Story complete</span>
+            <h2>Congratulations!</h2>
+            <p>You’ve completed the story. Ready to check what you learned?</p>
+            <button class="start-button" id="take-quiz-button" type="button">Take a quiz <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="touch-controls" aria-label="Movement controls" hidden>
+            <button class="touch-key up" data-dir="up" type="button" aria-label="Move up">↑</button>
+            <button class="touch-key left" data-dir="left" type="button" aria-label="Move left">←</button>
+            <button class="touch-key down" data-dir="down" type="button" aria-label="Move down">↓</button>
+            <button class="touch-key right" data-dir="right" type="button" aria-label="Move right">→</button>
+            <button class="touch-talk" id="touch-talk" type="button">TALK <span>✦</span></button>
+          </div>
+        </div>
+      </section>
 
-  <div class="controls">
-    <button class="btn btn-start" id="startBtn" disabled>▶️ Start Monitoring</button>
-    <button class="btn btn-stop" id="stopBtn" style="display:none">⏹️ Stop Monitoring</button>
-    <button class="btn btn-secondary" id="exportBtn">📥 Export Log</button>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-<script>
-// ---------- CONFIG ----------
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZevXYAPWAf_XEariClu9lDlitKj3SMy8zLiqRcAFqZRzYUXL-lmlDyYjBovU0m6is5g/exec';
-
-// ---------- STATE ----------
-let stream, holistic, camera, monitoring = false;
-let stats = { checks:0, distracted:0, noFace:0, posture:0, clicks:0, keys:0, scrolls:0, scoreSum:0, eyeClosed:0 };
-let sessionScores = []; // every analyzeFrame score for this session, for the end-of-session summary
-let eventLog = [];
-let lastClickTime = Date.now(), lastKeyTime = Date.now();
-let latestLandmarks = { face:null, pose:null };
-let logIntervalId, analyzeIntervalId;
-let selectedStudent = null; // { name, id }
-let sessionStartTime = null;
-
-// System-wide activity, reported by the companion browser extension (chrome.idle),
-// which sees real mouse/keyboard use across ALL apps, not just this tab. Falls back
-// to page-only signals (clicks/keys/scroll on this tab) if the extension isn't installed.
-let extensionConnected = false;
-let lastSystemActiveTime = Date.now();
-
-window.addEventListener('message', (event) => {
-  if (event.source !== window || !event.data || event.data.source !== 'attention-extension') return;
-  if (event.data.type === 'ready') {
-    extensionConnected = true;
-    document.getElementById('extensionStatus').innerText = '✅ System activity: connected';
-  }
-  if (event.data.type === 'lastActive') {
-    extensionConnected = true;
-    document.getElementById('extensionStatus').innerText = '✅ System activity: connected';
-    // The extension's background worker + storage record this even while this tab
-    // is frozen/backgrounded, so this can legitimately jump forward when the tab
-    // wakes back up — that's it catching up, not a live tick.
-    if (event.data.timestamp > lastSystemActiveTime) lastSystemActiveTime = event.data.timestamp;
-  }
-});
-// If no 'ready' message arrives shortly, the extension isn't installed — fall back gracefully.
-setTimeout(() => {
-  if (!extensionConnected) {
-    document.getElementById('extensionStatus').innerText = '⚪ System activity: not installed (using tab-only signals)';
-  }
-}, 2000);
-
-// Rolling window of the last few raw per-check scores, used to smooth out single-frame
-// noise (a brief head turn, a momentary tracking glitch) so it doesn't spike a false
-// "distracted" event or tank the score on its own.
-let recentRawScores = [];
-
-// ---------- LOAD STUDENT LIST (JSONP — Apps Script doesn't send CORS headers for fetch()) ----------
-function loadStudents() {
-  const select = document.getElementById('studentSelect');
-  const callbackName = 'handleStudents_' + Date.now();
-  const timeout = setTimeout(() => {
-    if (window[callbackName]) {
-      select.innerHTML = '<option value="">Failed to load students (timed out)</option>';
-      delete window[callbackName];
-    }
-  }, 10000);
-
-  window[callbackName] = function (students) {
-    clearTimeout(timeout);
-    if (!students || !students.length) {
-      select.innerHTML = '<option value="">No students found in sheet</option>';
-    } else {
-      select.innerHTML = '<option value="">Select a student…</option>' +
-        students.map(s => `<option value="${s.id}" data-name="${s.name}">${s.name} (${s.id})</option>`).join('');
-      document.getElementById('requestCameraBtn').disabled = false;
-    }
-    delete window[callbackName];
-    script.remove();
-  };
-
-  const script = document.createElement('script');
-  script.src = `${APPS_SCRIPT_URL}?listStudents=1&callback=${callbackName}`;
-  script.onerror = () => {
-    clearTimeout(timeout);
-    select.innerHTML = '<option value="">Failed to load students</option>';
-    delete window[callbackName];
-  };
-  document.body.appendChild(script);
-}
-document.getElementById('studentSelect').addEventListener('change', (e) => {
-  const opt = e.target.selectedOptions[0];
-  selectedStudent = opt && opt.value ? { id: opt.value, name: opt.dataset.name } : null;
-});
-window.addEventListener('load', loadStudents);
-
-const video = document.getElementById('video');
-const overlay = document.getElementById('overlay');
-const ctx = overlay.getContext('2d');
-const placeholder = document.getElementById('placeholder');
-const setupBox = document.getElementById('setupBox');
-const startBtn = document.getElementById('startBtn');
-const stopBtn = document.getElementById('stopBtn');
-
-// ---------- INPUT ACTIVITY TRACKING ----------
-// isTrusted is true only for events genuinely generated by the user (a real click,
-// real keypress, real scroll) — it's false for anything dispatched by JavaScript
-// (e.g. a script firing fake click/keydown/scroll events to spoof engagement).
-let lastScrollTime = Date.now(), lastScrollY = window.scrollY;
-
-window.addEventListener('click', (e) => {
-  if (!e.isTrusted) return;
-  lastClickTime = Date.now();
-  stats.clicks++;
-  document.getElementById('clickCount').innerText = stats.clicks;
-});
-
-window.addEventListener('keydown', (e) => {
-  if (!e.isTrusted) return;
-  lastKeyTime = Date.now();
-  stats.keys++;
-  document.getElementById('keyCount').innerText = stats.keys;
-});
-
-window.addEventListener('scroll', (e) => {
-  if (!e.isTrusted) return;
-  const now = Date.now();
-  const movedEnough = Math.abs(window.scrollY - lastScrollY) > 15;
-  // Throttle: only count as a distinct scroll "event" if it's been a moment since
-  // the last one and the page actually moved a meaningful amount — avoids counting
-  // every scroll-fired pixel tick as separate purposeful activity.
-  if (movedEnough && now - lastScrollTime > 250) {
-    lastScrollTime = now;
-    lastScrollY = window.scrollY;
-    stats.scrolls++;
-    document.getElementById('scrollCount').innerText = stats.scrolls;
-  }
-}, { passive: true });
-
-// ---------- CAMERA ----------
-document.getElementById('requestCameraBtn').addEventListener('click', async () => {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 } });
-    video.srcObject = stream;
-    placeholder.style.display = 'none';
-    setupBox.style.display = 'none';
-    startBtn.disabled = false;
-    logEvent('Camera ready.', 'ok');
-    initHolistic();
-  } catch (e) {
-    logEvent('Camera error: ' + e.message, 'bad');
-  }
-});
-
-function initHolistic() {
-  holistic = new Holistic({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${f}` });
-  holistic.setOptions({ modelComplexity: 1, smoothLandmarks: true, refineFaceLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-  holistic.onResults((results) => {
-    latestLandmarks.face = results.faceLandmarks || null;
-    latestLandmarks.pose = results.poseLandmarks || null;
-    drawOverlay(results);
-  });
-  camera = new Camera(video, {
-    onFrame: async () => { await holistic.send({ image: video }); },
-    width: 640, height: 480
-  });
-  camera.start();
-}
-
-function drawOverlay(results) {
-  overlay.width = video.videoWidth || 640;
-  overlay.height = video.videoHeight || 480;
-  ctx.clearRect(0, 0, overlay.width, overlay.height);
-  ctx.fillStyle = '#4caf50';
-  if (results.faceLandmarks) {
-    for (const p of results.faceLandmarks) ctx.fillRect(p.x * overlay.width, p.y * overlay.height, 1, 1);
-  }
-}
-
-// ---------- ANALYSIS ----------
-function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
-
-function eyeAspectRatio(lm, idx) {
-  // idx = [outerCorner, top1, top2, innerCorner, bottom1, bottom2]
-  const [o, t1, t2, i, b1, b2] = idx.map(n => lm[n]);
-  const vertical = (dist(t1, b1) + dist(t2, b2)) / 2;
-  const horizontal = dist(o, i);
-  return horizontal ? vertical / horizontal : 0;
-}
-
-const LEFT_EYE = [33, 160, 158, 133, 153, 144];
-const RIGHT_EYE = [263, 387, 385, 362, 380, 373];
-
-function analyzeFrame() {
-  if (!monitoring) return;
-  stats.checks++;
-  document.getElementById('totalChecks').innerText = stats.checks;
-
-  let headStatus = 'N/A', eyeStatus = 'N/A', postureStatus = 'N/A';
-  let headPenalty = 0, eyePenalty = 0, posturePenalty = 0;
-  let faceDetected = false;
-
-  const face = latestLandmarks.face;
-  if (face && face.length > 0) {
-    faceDetected = true;
-    // Head yaw estimate: nose tip (1) relative to face width (cheek landmarks 234/454)
-    const nose = face[1], leftCheek = face[234], rightCheek = face[454];
-    const faceWidth = dist(leftCheek, rightCheek) || 1;
-    const noseOffset = (nose.x - (leftCheek.x + rightCheek.x) / 2) / faceWidth;
-    const recentlyTyping = (Date.now() - lastKeyTime) < 2000; // glancing at the keyboard while typing is normal, not distraction
-    if (Math.abs(noseOffset) > 0.25) {
-      headStatus = noseOffset > 0 ? 'turned right' : 'turned left';
-      headPenalty = recentlyTyping ? 15 : 35;
-    } else {
-      headStatus = 'forward';
-    }
-
-    // Eye closure via EAR
-    const ear = (eyeAspectRatio(face, LEFT_EYE) + eyeAspectRatio(face, RIGHT_EYE)) / 2;
-    if (ear < 0.18) { eyeStatus = 'closed/drowsy'; eyePenalty = 30; stats.eyeClosed++; }
-    else { eyeStatus = 'open'; }
-  } else {
-    headStatus = 'no face'; eyeStatus = 'no face';
-    headPenalty = 40; eyePenalty = 20;
-    stats.noFace++;
-    document.getElementById('noFaceCount').innerText = stats.noFace;
-  }
-
-  const pose = latestLandmarks.pose;
-  if (pose && pose.length > 0) {
-    // Posture: forward-lean / slouch via nose-to-shoulder-midpoint vertical gap & shoulder tilt
-    const nose = pose[0], lShoulder = pose[11], rShoulder = pose[12];
-    if (nose && lShoulder && rShoulder) {
-      const shoulderMidY = (lShoulder.y + rShoulder.y) / 2;
-      const shoulderWidth = dist(lShoulder, rShoulder) || 1;
-      const headDrop = (nose.y - shoulderMidY) / shoulderWidth; // more negative normally; less negative = slouch
-      const shoulderTilt = Math.abs(lShoulder.y - rShoulder.y) / shoulderWidth;
-      if (headDrop > -0.3 || shoulderTilt > 0.25) {
-        postureStatus = 'slouching'; posturePenalty = 20;
-        stats.posture++;
-        document.getElementById('postureCount').innerText = stats.posture;
-      } else {
-        postureStatus = 'upright';
-      }
-    }
-  } else {
-    postureStatus = 'not visible'; posturePenalty = 10;
-  }
-
-  // Idle penalty: prefer the extension's real system-wide signal (sees activity in
-  // ANY app) when connected; otherwise fall back to this-tab-only clicks/keys/scroll.
-  const idleSeconds = extensionConnected
-    ? Math.min((Date.now() - lastSystemActiveTime) / 1000, 999)
-    : Math.min((Date.now() - Math.max(lastClickTime, lastKeyTime, lastScrollTime)) / 1000, 999);
-  let idlePenalty = 0;
-  if (idleSeconds > 90) idlePenalty = 15;
-  else if (idleSeconds > 45) idlePenalty = 8;
-
-  const rawScore = Math.max(0, Math.min(100, 100 - headPenalty - eyePenalty - posturePenalty - idlePenalty));
-  recentRawScores.push(rawScore);
-  if (recentRawScores.length > 3) recentRawScores.shift();
-  // Smoothed over the last up-to-3 checks: a single noisy/false-positive frame gets
-  // averaged out instead of immediately logging a "distracted" event or tanking the score.
-  const score = Math.round(recentRawScores.reduce((a, b) => a + b, 0) / recentRawScores.length);
-  stats.scoreSum += score;
-  sessionScores.push(score);
-
-  document.getElementById('scoreVal').innerText = score;
-  document.getElementById('headStatus').innerText = headStatus;
-  document.getElementById('eyeStatus').innerText = eyeStatus;
-  document.getElementById('postureStatus').innerText = postureStatus;
-  document.getElementById('idleStatus').innerText = Math.round(idleSeconds);
-  document.getElementById('barFill').style.width = score + '%';
-  document.getElementById('avgScore').innerText = Math.round(stats.scoreSum / stats.checks);
-
-  if (score < 50) {
-    stats.distracted++;
-    document.getElementById('distractedCount').innerText = stats.distracted;
-    logEvent(`Low attention (${score}) — head:${headStatus}, eyes:${eyeStatus}, posture:${postureStatus}`, 'bad');
-  } else if (score < 75) {
-    logEvent(`Attention dip (${score})`, 'warn');
-  }
-
-  return { score, headStatus, eyeStatus, postureStatus, faceDetected, idleSeconds, clicks: stats.clicks, keys: stats.keys, scrolls: stats.scrolls };
-}
-
-function logEvent(message, type) {
-  const time = new Date().toLocaleTimeString();
-  eventLog.unshift({ message, type, time });
-  if (eventLog.length > 60) eventLog.pop();
-  document.getElementById('eventLog').innerHTML = eventLog.map(e =>
-    `<div class="log-entry ${e.type}"><div>${e.message}</div><div class="log-time">${e.time}</div></div>`).join('');
-}
-
-// ---------- LOGGING TO APPS SCRIPT (Google Sheets) ----------
-async function sendLog(result) {
-  if (!selectedStudent) return;
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors', // Apps Script doPost doesn't return readable CORS headers; this still delivers the POST
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ type: 'tick', studentId: selectedStudent.id, timestamp: new Date().toISOString(), ...result })
-    });
-  } catch (e) {
-    console.warn('Log send failed', e);
-  }
-}
-
-function generateFeedback() {
-  if (sessionScores.length === 0) return 'No data captured for this session.';
-  const avg = Math.round(sessionScores.reduce((a, b) => a + b, 0) / sessionScores.length);
-  let headline;
-  if (avg >= 85) headline = 'Excellent focus throughout the session.';
-  else if (avg >= 70) headline = 'Good attention with a few brief distractions.';
-  else if (avg >= 50) headline = 'Moderate attention with noticeable lapses in focus.';
-  else headline = 'Low attention overall, with frequent distraction or disengagement.';
-
-  // Call out the most common contributing issue
-  const issues = [
-    { label: 'looking away from the screen', count: stats.distracted },
-    { label: 'not being visible to the camera', count: stats.noFace },
-    { label: 'drowsiness / eyes closing', count: stats.eyeClosed },
-    { label: 'slouching or poor posture', count: stats.posture }
-  ].sort((a, b) => b.count - a.count);
-  const topIssue = issues[0].count > 0 ? ` Most frequent issue: ${issues[0].label} (${issues[0].count} instances).` : '';
-
-  const idleNote = (stats.clicks + stats.keys + stats.scrolls) < stats.checks * 0.3
-    ? ' Low mouse/keyboard/scroll activity relative to session length suggests limited active engagement.'
-    : '';
-
-  return `${headline}${topIssue}${idleNote}`;
-}
-
-async function sendSessionSummary() {
-  if (!selectedStudent || sessionScores.length === 0) return;
-  const avg = Math.round(sessionScores.reduce((a, b) => a + b, 0) / sessionScores.length);
-  const durationMinutes = sessionStartTime ? Math.round((Date.now() - sessionStartTime) / 60000) : null;
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        type: 'sessionEnd',
-        studentId: selectedStudent.id,
-        overallScore: avg,
-        durationMinutes,
-        stats: {
-          checks: stats.checks, distracted: stats.distracted, noFace: stats.noFace,
-          eyeClosed: stats.eyeClosed, posture: stats.posture,
-          clicks: stats.clicks, keys: stats.keys, scrolls: stats.scrolls
-        }
-      })
-    });
-    // The actual feedback sentence is written by DeepSeek server-side (see Code.gs) —
-    // this local version (generateFeedback()) is only for an immediate log line here,
-    // since the no-cors POST above can't read a response back.
-    logEvent(`Session summary saved for ${selectedStudent.name}: score ${avg}. AI feedback being written to sheet…`, 'ok');
-  } catch (e) {
-    logEvent('Failed to save session summary: ' + e.message, 'bad');
-  }
-}
-
-// ---------- CONTROLS ----------
-startBtn.addEventListener('click', () => {
-  if (!selectedStudent) { alert('Please select a student first.'); return; }
-  sessionScores = [];
-  sessionStartTime = Date.now();
-  monitoring = true;
-  startBtn.style.display = 'none';
-  stopBtn.style.display = 'block';
-  document.getElementById('studentSelect').disabled = true;
-  document.getElementById('sessionStatus').classList.add('active');
-  document.getElementById('sessionStatus').innerText = 'Active: ' + selectedStudent.name;
-  logEvent(`Monitoring started for ${selectedStudent.name}.`, 'ok');
-  analyzeIntervalId = setInterval(analyzeFrame, 1500);
-  logIntervalId = setInterval(() => sendLog(analyzeFrame()), 10000);
-});
-
-document.getElementById('stopBtn').addEventListener('click', async () => {
-  monitoring = false;
-  startBtn.style.display = 'block';
-  stopBtn.style.display = 'none';
-  document.getElementById('studentSelect').disabled = false;
-  document.getElementById('sessionStatus').classList.remove('active');
-  document.getElementById('sessionStatus').innerText = 'Inactive';
-  clearInterval(analyzeIntervalId);
-  clearInterval(logIntervalId);
-  logEvent('Monitoring stopped. Saving session summary…', 'ok');
-  await sendSessionSummary();
-});
-
-document.getElementById('exportBtn').addEventListener('click', () => {
-  const data = { exportedAt: new Date().toISOString(), stats, eventLog };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `attention-log-${Date.now()}.json`;
-  a.click();
-});
-</script>
-</body>
+      <footer class="footer"><span>Made for a kinder conversation about vaping.</span><span>You deserve support without judgment.</span></footer>
+    </main>
+  </body>
 </html>
