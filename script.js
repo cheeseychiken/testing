@@ -143,13 +143,14 @@ let canvasScale = 1;
 let worldHeight = 540;
 let lastFrame = 0;
 let toastTimer;
-const quizUrl = "";
+const quizUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdQpCcPQRq-X0taFgfIOn3G5HLF-hTMRLaX0CDvXJepvMBxuQ/viewform?usp=dialog";
 let audioContext = null;
 let musicTimer = null;
 let musicNoteIndex = 0;
 let musicGain = null;
 let effectsGain = null;
 let masterCompressor = null;
+const musicLevel = 0.8;
 
 function createStoryChoices() {
   return {
@@ -921,7 +922,7 @@ function getAudioContext() {
     masterCompressor.release.value = 0.22;
     masterCompressor.connect(audioContext.destination);
     musicGain = audioContext.createGain();
-    musicGain.gain.value = audioMuted ? 0 : .34;
+    musicGain.gain.value = audioMuted ? 0 : musicLevel;
     musicGain.connect(masterCompressor);
     effectsGain = audioContext.createGain();
     effectsGain.gain.value = audioMuted ? 0 : 1;
@@ -949,36 +950,47 @@ function playTone(frequency, startTime, duration, volume, waveform = "sine") {
 function startBackgroundMusic() {
   if (audioMuted || !getAudioContext() || musicTimer) return;
   const melody = [
-    220, 261.63, 293.66, 329.63,
-    246.94, 293.66, 329.63, 293.66,
-    196, 246.94, 293.66, 329.63,
-    220, 261.63, 293.66, 261.63
+    261.63, 329.63, 392, 329.63,
+    293.66, 349.23, 392, 349.23,
+    261.63, 329.63, 440, 392,
+    293.66, 349.23, 392, 329.63
   ];
-  const bassLine = [110, 123.47, 98, 87.31];
-  musicTimer = window.setInterval(() => {
+  const chords = [
+    [261.63, 329.63, 392],
+    [246.94, 293.66, 392],
+    [220, 261.63, 329.63],
+    [220, 261.63, 349.23]
+  ];
+  const bassLine = [130.81, 123.47, 110, 110];
+  const playNextNote = () => {
     const now = audioContext.currentTime + 0.03;
     const noteIndex = musicNoteIndex % melody.length;
-    playMusicTone(melody[noteIndex], now, 2.4, .045);
+    playMusicTone(melody[noteIndex], now, 0.95, .09, 0.12, 0.28);
     if (noteIndex % 4 === 0) {
-      playMusicTone(bassLine[Math.floor(noteIndex / 4) % bassLine.length], now, 4.8, .025);
+      const chordIndex = Math.floor(noteIndex / 4) % chords.length;
+      chords[chordIndex].forEach((frequency) => playMusicTone(frequency, now, 5.1, .018, 0.7, 0.7));
+      playMusicTone(bassLine[chordIndex], now, 4.8, .02, 0.6, 0.65);
     }
     musicNoteIndex += 1;
-  }, 1850);
+  };
+  playNextNote();
+  musicTimer = window.setInterval(playNextNote, 1450);
 }
 
-function playMusicTone(frequency, startTime, duration, volume) {
+function playMusicTone(frequency, startTime, duration, volume, attack = 0.07, release = 0.3) {
   if (!audioContext || !musicGain) return;
   const oscillator = audioContext.createOscillator();
   const gain = audioContext.createGain();
   oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(frequency, startTime);
   gain.gain.setValueAtTime(0.0001, startTime);
-  gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.07);
-  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  gain.gain.exponentialRampToValueAtTime(volume, startTime + attack);
+  gain.gain.setValueAtTime(volume, startTime + duration);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration + release);
   oscillator.connect(gain);
   gain.connect(musicGain);
   oscillator.start(startTime);
-  oscillator.stop(startTime + duration + 0.03);
+  oscillator.stop(startTime + duration + release + 0.03);
 }
 
 function playEndingSound(isHopeful) {
@@ -988,7 +1000,7 @@ function playEndingSound(isHopeful) {
     musicGain.gain.cancelScheduledValues(now);
     musicGain.gain.setValueAtTime(musicGain.gain.value, now);
     musicGain.gain.linearRampToValueAtTime(0.08, now + 0.08);
-    musicGain.gain.linearRampToValueAtTime(audioMuted ? 0 : .34, now + 1.8);
+    musicGain.gain.linearRampToValueAtTime(audioMuted ? 0 : musicLevel, now + 1.8);
   }
   const notes = isHopeful
     ? [
@@ -1014,7 +1026,7 @@ function updateAudioControl() {
     const now = audioContext.currentTime;
     musicGain.gain.cancelScheduledValues(now);
     effectsGain.gain.cancelScheduledValues(now);
-    musicGain.gain.setTargetAtTime(audioMuted ? 0 : .34, now, .08);
+    musicGain.gain.setTargetAtTime(audioMuted ? 0 : musicLevel, now, .08);
     effectsGain.gain.setTargetAtTime(audioMuted ? 0 : 1, now, .04);
   }
   if (audioMuted && musicTimer) {
@@ -1585,6 +1597,7 @@ function beginGame() {
   vapingContinues = false;
   storyChoices = createStoryChoices();
   startScene();
+  startBackgroundMusic();
   canvas.focus({ preventScroll: true });
 }
 
