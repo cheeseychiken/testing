@@ -239,6 +239,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .vn-background-school { display: block; }
 
 .visual-novel-stage[data-setting="bedroom"] .vn-background-school,
+.visual-novel-stage[data-setting="bathroom"] .vn-background-school,
 .visual-novel-stage[data-setting="home"] .vn-background-school,
 .visual-novel-stage[data-setting="park"] .vn-background-school { display: none; }
 
@@ -247,6 +248,42 @@ button { -webkit-tap-highlight-color: transparent; }
   background:
     linear-gradient(180deg, transparent 0 77%, #d6c6b2 77% 79%, #c4af97 79% 100%),
     linear-gradient(90deg, #e5dfd4 0 12%, #eee8df 12% 100%);
+}
+
+.visual-novel-stage[data-setting="bathroom"] {
+  background:
+    linear-gradient(180deg, transparent 0 72%, #b9c9bf 72% 74%, #aebfb4 74% 100%),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(94,125,119,.15) 40px 42px),
+    repeating-linear-gradient(90deg, #dce5df 0 78px, rgba(94,125,119,.15) 79px 81px);
+}
+
+.visual-novel-stage[data-setting="bathroom"]::before {
+  position: absolute;
+  z-index: 0;
+  top: 16%;
+  left: 9%;
+  width: 35%;
+  height: 45%;
+  border: 8px solid #79928c;
+  border-radius: 7px;
+  background:
+    linear-gradient(90deg, transparent 49%, #e5ece5 49% 51%, transparent 51%),
+    #a9bcb2;
+  content: "";
+}
+
+.visual-novel-stage[data-setting="bathroom"]::after {
+  position: absolute;
+  z-index: 0;
+  right: 12%;
+  bottom: 20%;
+  width: 23%;
+  height: 8%;
+  border: 5px solid #78938c;
+  border-radius: 8px;
+  background: #e9eeea;
+  box-shadow: 0 18px 0 -7px #80978e;
+  content: "";
 }
 
 .visual-novel-stage[data-setting="bedroom"]::before,
@@ -343,6 +380,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .visual-novel-stage[data-cast-count="3"] .vn-character { left: 18%; }
 .visual-novel-stage[data-cast-count="3"] .vn-character-secondary { left: 50%; }
 .visual-novel-stage[data-cast-count="3"] .vn-character-family { left: 82%; }
+.visual-novel-stage[data-cast-count="3"] .vn-character[data-character="student-one"] { left: 18%; }
+.visual-novel-stage[data-cast-count="3"] .vn-character[data-character="student-two"] { left: 82%; }
 .visual-novel-stage[data-cast-count="4"] .vn-character { left: 13%; }
 .visual-novel-stage[data-cast-count="4"] .vn-character-secondary { left: 38%; }
 .visual-novel-stage[data-cast-count="4"] .vn-character-family { left: 63%; }
@@ -352,7 +391,7 @@ button { -webkit-tap-highlight-color: transparent; }
   z-index: 2;
   filter: drop-shadow(0 9px 14px rgba(48, 37, 34, .2));
   opacity: 1;
-  animation: speaker-hop 1.15s ease-in-out infinite;
+  animation: speaker-bob 2s ease-in-out infinite;
 }
 
 .vn-portrait svg,
@@ -373,6 +412,10 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .world-wrap.visual-novel .character-portrait {
   animation: character-breathe 3.8s ease-in-out infinite;
+}
+
+.world-wrap.visual-novel .vn-character[data-speaking="true"] .character-portrait {
+  animation: none;
 }
 
 .character-eyes .eye-blink {
@@ -470,6 +513,43 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .vn-character[data-character="you"] .friend-locks { display: none; }
 
+.vn-character[data-character="student-one"] .character-hair-friend,
+.vn-character[data-character="student-one"] .character-hair-you,
+.vn-character[data-character="student-one"] .hair-detail-friend,
+.vn-character[data-character="student-one"] .hair-detail-you,
+.vn-character[data-character="student-one"] .friend-locks,
+.vn-character[data-character="student-two"] .character-hair-friend,
+.vn-character[data-character="student-two"] .character-hair-family,
+.vn-character[data-character="student-two"] .hair-detail-friend,
+.vn-character[data-character="student-two"] .friend-locks { display: none; }
+.vn-character[data-character="student-one"] .character-hair-family {
+  display: inline;
+  fill: #4a3028;
+}
+.vn-character[data-character="student-two"] .character-hair-you {
+  display: inline;
+  fill: #283e4a;
+}
+.vn-character[data-character="student-two"] .hair-detail-you {
+  display: inline;
+  stroke: #526d79;
+}
+.vn-character[data-character="student-one"] .character-skin,
+.vn-character[data-character="student-one"] .character-neck,
+.vn-character[data-character="student-one"] .character-hand { fill: #bd8060; }
+.vn-character[data-character="student-two"] .character-skin,
+.vn-character[data-character="student-two"] .character-neck,
+.vn-character[data-character="student-two"] .character-hand { fill: #e0b08b; }
+.vn-character[data-character="student-one"] .friend-shirt { fill: #567d88; }
+.vn-character[data-character="student-one"] .friend-shirt-shadow,
+.vn-character[data-character="student-one"] .vn-arm-outline { fill: #385864; stroke: #385864; }
+.vn-character[data-character="student-one"] .vn-arm-fill { stroke: #567d88; }
+.vn-character[data-character="student-two"] .friend-shirt { fill: #98729a; }
+.vn-character[data-character="student-two"] .friend-shirt-shadow,
+.vn-character[data-character="student-two"] .vn-arm-outline { fill: #6d5277; stroke: #6d5277; }
+.vn-character[data-character="student-two"] .vn-arm-fill { stroke: #98729a; }
+.council-badge { pointer-events: none; }
+
 .vn-character[data-character="family"] .character-hair-you,
 .vn-character[data-character="family"] .hair-detail-you,
 .vn-character[data-character="family"] .hair-detail-friend,
@@ -506,7 +586,10 @@ button { -webkit-tap-highlight-color: transparent; }
 .vn-character[data-health="strained"] .health-eye-shadow { opacity: .6; }
 .health-eye-shadow,
 .health-cough-arm { display: none; }
+.brochure-holding-arm { display: none; }
 .vn-character[data-health="strained"] .health-eye-shadow { display: inline; }
+.vn-character[data-action="reading-brochure"] .vn-arms { display: none; }
+.vn-character[data-action="reading-brochure"] .brochure-holding-arm { display: inline; }
 .vn-character[data-action="coughing"] .health-cough-arm { display: inline; }
 .vn-character[data-action="coughing"] .vn-gesture-arm { display: none; }
 .vn-character[data-action="coughing"] .vn-resting-arm { display: none; }
@@ -526,7 +609,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .vn-character.is-speaking .vn-gesture-arm {
   transform-box: view-box;
   transform-origin: 219px 354px;
-  animation: arm-gesture 1.5s ease-in-out infinite alternate;
 }
 
 .vape-action-arm,
@@ -731,8 +813,10 @@ button { -webkit-tap-highlight-color: transparent; }
   grid-column: 2;
   grid-row: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
+  gap: 6px;
 }
 
 .continue-button {
@@ -751,6 +835,9 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 
 .continue-button:hover { background: #3e654d; transform: translateX(2px); }
+.previous-dialogue-button:not(:disabled):hover { transform: translateX(-2px); }
+.continue-button:disabled { background: #aab8a7; cursor: not-allowed; }
+.continue-button:disabled:hover { transform: none; }
 
 .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 7px; }
 
@@ -974,9 +1061,9 @@ body[data-text-size="large"] .resource-list a { font-size: 1.15em; }
   50% { transform: translateY(-3px); }
 }
 
-@keyframes speaker-hop {
+@keyframes speaker-bob {
   0%, 100% { transform: translate(-50%, 0); }
-  45% { transform: translate(-50%, -9px); }
+  50% { transform: translate(-50%, -2px); }
 }
 
 @keyframes vape-drift {
@@ -993,11 +1080,6 @@ body[data-text-size="large"] .resource-list a { font-size: 1.15em; }
 @keyframes mouth-open {
   0%, 70% { opacity: 0; }
   71%, 100% { opacity: 1; }
-}
-
-@keyframes arm-gesture {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-3deg); }
 }
 
 @keyframes confetti-fall {

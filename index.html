@@ -29,7 +29,7 @@
             <span class="chapter-dot"></span>
             <span id="chapter-name">THE BEGINNING</span>
           </div>
-          <div class="objective"><span class="objective-icon">✦</span><span id="objective-text">Find your friend</span></div>
+          <div class="objective"><span class="objective-icon">✦</span><span id="objective-text">Walk to your seat beside Pickles</span></div>
           <div class="scene-counter" id="scene-counter">PROLOGUE</div>
           <div class="chapter-progress" id="chapter-progress" role="progressbar" aria-label="Story progress" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" aria-valuetext="Introduction">
             <span class="progress-label">STORY PROGRESS</span>
@@ -78,6 +78,16 @@
                     <path class="vn-arm-fill" d="M217 350C221 380 205 420 172 450" fill="none" stroke="#78977f" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
                     <ellipse class="character-hand" cx="169" cy="452" rx="8" ry="5" fill="#d4a27e"/>
                   </g>
+                </g>
+                <g class="brochure-holding-arm" aria-hidden="true">
+                  <path class="vn-arm-outline" d="M103 350C108 376 126 391 142 407" fill="none" stroke="#526e69" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path class="vn-arm-fill" d="M103 350C108 376 126 391 142 407" fill="none" stroke="#78977f" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path class="vn-arm-outline" d="M217 350C212 376 194 391 178 407" fill="none" stroke="#526e69" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path class="vn-arm-fill" d="M217 350C212 376 194 391 178 407" fill="none" stroke="#78977f" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M133 392h54v67h-54z" fill="#f3eee1" stroke="#d4c7b1" stroke-width="2"/>
+                  <path d="M160 395v61m-19-48h13m-13 9h13m-13 9h13m13-18h12m-12 9h12m-12 9h12" fill="none" stroke="#829b88" stroke-width="2" stroke-linecap="round"/>
+                  <ellipse class="character-hand" cx="142" cy="407" rx="7" ry="6" fill="#d4a27e"/>
+                  <ellipse class="character-hand" cx="178" cy="407" rx="7" ry="6" fill="#d4a27e"/>
                 </g>
                 <g class="vape-action-arm" aria-hidden="true">
                   <path d="M217 350C211 327 199 309 184 291" fill="none" stroke="#873d43" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
@@ -148,6 +158,12 @@
               <p class="health-cutscene-step" id="health-cutscene-step"></p>
               <p class="health-cutscene-copy" id="health-cutscene-copy"></p>
               <button class="continue-button" id="health-cutscene-next" type="button" aria-label="Continue scene">→</button>
+            </div>
+          </section>
+          <section class="health-cutscene" id="home-transition" aria-live="polite" hidden>
+            <div class="health-cutscene-card">
+              <p class="health-cutscene-copy" id="home-transition-copy">After school ends, we head back home.</p>
+              <button class="continue-button" id="home-transition-next" type="button" aria-label="Continue home">→</button>
             </div>
           </section>
           <div class="dialogue" id="dialogue" hidden>
