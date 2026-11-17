@@ -66,6 +66,8 @@ const homeTransitionCopy = document.querySelector("#home-transition-copy");
 const homeTransitionNext = document.querySelector("#home-transition-next");
 const audioToggle = document.querySelector("#audio-toggle");
 const textSizeToggle = document.querySelector("#text-size-toggle");
+const bathroomExitNarration = "After that, the two students leave the bathroom.";
+const bathroomAftermathNarration = "Your eyes widen—you had no idea it carried actual jail time and massive fines. Pickles looks rattled too.";
 
 const scenes = [
   {
@@ -80,25 +82,25 @@ const scenes = [
       { speaker: "Pickles", text: "Schools confiscate the device and may take disciplinary action, such as detention or suspension, and contact your parents. What do you think?", mood: "worried" }
     ],
     choices: [
-      { text: "Ask Pickles more questions out of curiosity as you pack your bag and walk out together. (Leads into Scene 2) -Good ending option" },
-      { text: "Say yes and try vaping. (Bad-ending route)" }
+      { text: "Ask Pickles more questions out of curiosity as you pack your bag and walk out together." },
+      { text: "Say yes and try vaping." }
     ]
   },
   {
     chapter: "THE SCHOOL TOILET",
     setting: "bathroom",
     dialogue: [
-      { speaker: "Narration", text: "After school, you walk to the washroom with Pickles. He seems restless, like he has the urge to vape. Suddenly, the washroom door swings open and two older students walk in, talking panickily about a major anti-vaping assembly the school is organizing." },
+      { speaker: "Narration", text: "After school, you walk to the washroom hallway with Pickles as he has the urge to vape. You and Pickle went to individual cubicles. Suddenly, the washroom door swings open and two older student walking in, talking panickily about a major anti-vaping assembly the school are organizing." },
       { speaker: "Student 1", text: "Bro, I am very stressed because I heard the school is taking action against vaping. I know it’s bad and stuff, but is it actually that harmful?", mood: "worried" },
       { speaker: "Student 2", text: "It’s completely harmful, and I also heard it’s illegal in Singapore—using, buying, or even owning one is banned. Around 800 students were referred to the Health Sciences Authority (HSA) for vaping offences in 2022 alone.", mood: "concerned" },
       { speaker: "Student 2", text: "And the penalties for anyone supplying them are huge. Anyone caught selling, importing, or distributing e-vaporisers for the first time faces a fine of up to S$10,000, up to six months in jail, or both.", mood: "worried" },
       { speaker: "Student 1", text: "What?! No wonder the World Health Organization urged governments in December 2023 to take urgent action to control e-cigarettes and ban flavored vapes to protect young people around the world. I thought they were joking. We should be careful not to get caught!", mood: "worried" },
-      { speaker: "Narration", text: "After that, the two students leave the bathroom." },
-      { speaker: "You", text: "Your eyes widen—you had no idea it carried actual jail time and massive fines. Pickles looks rattled too.", mood: "concerned" }
+      { speaker: "Narration", text: bathroomExitNarration },
+      { speaker: "You", text: bathroomAftermathNarration, mood: "concerned", thought: true }
     ],
     choices: [
-      { text: "Choose not to vape—you don't want to risk it. (Good route)" },
-      { text: "Vape even after knowing the consequences. (Continues to Scene 3; bad-ending route)" }
+      { text: "Choose not to vape—you don't want to risk it." },
+      { text: "Vape even after knowing the consequences." }
     ]
   },
   {
@@ -114,8 +116,8 @@ const scenes = [
       { speaker: "Narration", text: "You also read about a rare, life-threatening case where a vaper developed pulmonary alveolar proteinosis, a condition where proteins and fats clogged the lungs’ air sacs so severely that the person needed their lungs mechanically washed to survive." }
     ],
     choices: [
-      { text: "Tell your parents you were offered a vape and ask them for support. (Good route)" },
-      { text: "Keep your experience private and continue vaping. (Bad-ending route)" }
+      { text: "Tell your parents you were offered a vape and ask them for support." },
+      { text: "Keep your experience private and continue vaping." }
     ]
   },
   {
@@ -131,7 +133,7 @@ const scenes = [
     ],
     choices: [
       { text: "Say, “No, I think I should seek help from the professionals.”" },
-      { text: "Say, “So far so good. It feels nice, I think I will continue vaping.” (Ending scene)" }
+      { text: "Say, “So far so good. It feels nice, I think I will continue vaping.”" }
     ]
   }
 ];
@@ -139,6 +141,8 @@ const scenes = [
 const palette = {
   you: { skin: "#b77556", skinShade: "#965d48", hair: "#342a2b", hairLight: "#59413a", iris: "#547d9a", top: "#e89572", topShade: "#cc7458", pants: "#466572", shoes: "#f4e3bf" },
   friend: { skin: "#edbd91", skinShade: "#cf9874", hair: "#503830", hairLight: "#76503b", iris: "#649176", top: "#71957b", topShade: "#567761", pants: "#705e80", shoes: "#f6e5c7" },
+  studentOne: { skin: "#d2a27d", skinShade: "#b27d5c", hair: "#49352f", hairLight: "#725447", iris: "#547d9a", top: "#628a78", topShade: "#496b5b", pants: "#5e6970", shoes: "#f3e5c8" },
+  studentTwo: { skin: "#c98e6d", skinShade: "#a96f54", hair: "#2f3035", hairLight: "#534047", iris: "#547d9a", top: "#d28a68", topShade: "#af6753", pants: "#566b78", shoes: "#f3e5c8" },
   helper: { skin: "#d69b72", skinShade: "#b77b5d", hair: "#45352d", hairLight: "#695043", iris: "#9b7751", top: "#e2b15f", topShade: "#c89245", pants: "#657d71", shoes: "#f3e5c8" },
   clinician: { skin: "#d69b72", skinShade: "#b77b5d", hair: "#45352d", hairLight: "#695043", iris: "#9b7751", top: "#d7e8e4", topShade: "#9ebbb4", pants: "#627e83", shoes: "#f3e5c8" },
   mom: { skin: "#c58f70", skinShade: "#a16d56", hair: "#49352f", hairLight: "#725447", iris: "#547d9a", top: "#82718d", topShade: "#5e526a", pants: "#766b75", shoes: "#f3e5c8" },
@@ -154,6 +158,7 @@ let currentDialogue = [];
 let hallwayWalk = false;
 let bedroomWalk = false;
 let bathroomPhase = null;
+let bathroomExitStartedAt = null;
 let homeTransitionActive = false;
 let vapingContinues = false;
 let storyChoices = createStoryChoices();
@@ -466,14 +471,20 @@ function drawBathroom() {
   for (let x = 35; x < 960; x += 120) {
     line([[x, h * .76], [x - 30, h]], "rgba(82,104,94,.12)", 2);
   }
-  roundedRect(80, h * .19, 232, h * .42, 8, "#79928c");
-  roundedRect(88, h * .22, 216, h * .37, 5, "#a9bcb2");
-  line([[196, h * .23], [196, h * .58]], "#e5ece5", 5);
-  roundedRect(398, h * .15, 244, h * .33, 7, "#f3f0e7");
-  roundedRect(410, h * .17, 220, h * .29, 4, "#a8c6c3");
-  roundedRect(700, h * .5, 170, 20, 7, "#78938c");
-  roundedRect(727, h * .54, 118, 24, 10, "#e9eeea");
-  line([[786, h * .57], [786, h * .64]], "#80978e", 4);
+  for (const x of [70, 350]) {
+    roundedRect(x, h * .16, 250, h * .48, 8, "#79928c");
+    roundedRect(x + 12, h * .19, 226, h * .42, 5, "#a9bcb2");
+    roundedRect(x + 18, h * .27, 214, h * .35, 4, "#c8d7ce");
+    line([[x + 24, h * .29], [x + 24, h * .6]], "#e5ece5", 5);
+    ellipse(x + 205, h * .45, 4, 4, "#718a80");
+  }
+  roundedRect(685, h * .16, 208, h * .29, 8, "#79928c");
+  roundedRect(695, h * .18, 188, h * .25, 4, "#a9bcb2");
+  line([[789, h * .19], [789, h * .42]], "#e5ece5", 4);
+  line([[695, h * .3], [883, h * .3]], "#e5ece5", 4);
+  roundedRect(700, h * .5, 190, 20, 7, "#78938c");
+  roundedRect(727, h * .54, 136, 24, 10, "#e9eeea");
+  line([[795, h * .57], [795, h * .64]], "#80978e", 4);
 }
 
 function drawBedroom() {
@@ -868,6 +879,138 @@ function drawWorld() {
     }
     return;
   }
+  if (sceneIndex === 1 && bathroomPhase === "councillors") {
+    const dialoguePages = choiceAftermath || currentDialogue;
+    const page = dialoguePages[dialoguePageIndex];
+    if (storyChoices.goodEndingRoute) {
+      const speaker = page?.speaker;
+      if (dialoguePageIndex === 0 && speaker === "Narration") {
+        drawCharacter({
+          x: 660,
+          y: worldHeight * .82,
+          type: "studentOne",
+          concerned: true,
+          talking: false
+        });
+        drawCharacter({
+          x: 810,
+          y: worldHeight * .82,
+          type: "studentTwo",
+          concerned: true,
+          talking: false
+        });
+        return;
+      }
+      [
+        {
+          x: 300,
+          y: worldHeight * .82,
+          type: "you",
+          concerned: true,
+          talking: speaker === "You"
+        },
+        {
+          x: 420,
+          y: worldHeight * .82,
+          type: "friend",
+          concerned: true,
+          serious: true
+        },
+        {
+          x: 540,
+          y: worldHeight * .82,
+          type: "studentOne",
+          concerned: true,
+          talking: speaker === "Student Councillor 1"
+        },
+        {
+          x: 660,
+          y: worldHeight * .82,
+          type: "studentTwo",
+          concerned: true,
+          talking: speaker === "Student Councillor 2"
+        }
+      ].forEach(drawCharacter);
+      return;
+    }
+    const exitPageIndex = dialoguePages.findIndex((page) =>
+      page.speaker === "Narration" && page.text === bathroomExitNarration
+    );
+    if (exitPageIndex !== -1 && dialoguePageIndex > exitPageIndex) {
+      if (page.speaker === "You" && page.text === bathroomAftermathNarration) {
+        const exitElapsed = bathroomExitStartedAt === null
+          ? 0
+          : Math.max(0, performance.now() - bathroomExitStartedAt);
+        const cubicleProgress = Math.min(exitElapsed / 3000, 1);
+        const cubicleStep = cubicleProgress * 120;
+        const walkingOut = cubicleProgress < 1;
+        drawCharacter({
+          x: 195 + cubicleStep,
+          y: worldHeight * (.66 + cubicleProgress * .16),
+          type: "friend",
+          concerned: true,
+          serious: true,
+          holdingVape: true,
+          walking: walkingOut,
+          walkPhase: exitElapsed / 90,
+          scale: .72 + cubicleProgress * .28,
+          look: walkingOut ? "right" : undefined
+        });
+        drawCharacter({
+          x: 475 + cubicleStep,
+          y: worldHeight * (.66 + cubicleProgress * .16),
+          type: "you",
+          concerned: true,
+          serious: true,
+          walking: walkingOut,
+          walkPhase: exitElapsed / 90,
+          scale: .72 + cubicleProgress * .28,
+          look: walkingOut ? "right" : undefined
+        });
+      }
+      return;
+    }
+    const exitPage = page?.text === bathroomExitNarration;
+    const exitElapsed = exitPage && bathroomExitStartedAt !== null
+      ? Math.max(0, performance.now() - bathroomExitStartedAt)
+      : 0;
+    const exitProgress = Math.min(exitElapsed / 3000, 1);
+    const exitOffset = exitPage ? exitProgress * 340 : 0;
+    const walkingOut = exitPage && exitProgress < 1;
+    const speaker = page?.speaker;
+    drawCharacter({
+      x: 660 + exitOffset,
+      y: worldHeight * .82,
+      type: "studentOne",
+      concerned: true,
+      talking: speaker === "Student 1" || speaker === "Student Councillor 1",
+      walking: walkingOut,
+      walkPhase: exitElapsed / 90,
+      look: walkingOut ? "right" : undefined
+    });
+    drawCharacter({
+      x: 810 + exitOffset,
+      y: worldHeight * .82,
+      type: "studentTwo",
+      concerned: true,
+      talking: speaker === "Student 2" || speaker === "Student Councillor 2",
+      walking: walkingOut,
+      walkPhase: exitElapsed / 90,
+      look: walkingOut ? "right" : undefined
+    });
+    return;
+  }
+  if (bedroomWalk && homeTransitionActive) {
+    drawCharacter({
+      x: 835,
+      y: worldHeight * .36,
+      type: "you",
+      rotation: -Math.PI / 2,
+      eyesClosed: true,
+      sleeping: true
+    });
+    return;
+  }
   if (ending || talking || (!playing && sceneIndex < 0)) return;
 
   if (bedroomWalk) {
@@ -946,21 +1089,25 @@ function drawCharacter(person) {
   const x = person.x;
   const y = person.y;
   const walking = (isPlayer && keys.size > 0 && !talking && playing) || person.walking;
-  const phase = isPlayer || person.walking
-    ? player.step + (person.walking ? 1.1 : 0)
-    : performance.now() / 360 + (person.type === "helper" ? 1.4 : 0);
+  const phase = person.walking && person.walkPhase !== undefined
+    ? person.walkPhase
+    : isPlayer || person.walking
+      ? player.step + (person.walking ? 1.1 : 0)
+      : performance.now() / 360 + (person.type === "helper" ? 1.4 : 0);
   const bob = walking ? Math.abs(Math.sin(phase)) * 1.5 : Math.sin(performance.now() / 850 + x) * .45;
   const legSwing = walking ? Math.sin(phase) * .38 : 0;
   const armSwing = walking ? Math.sin(phase + Math.PI) * .28 : Math.sin(performance.now() / 1100 + x) * .025;
   const headY = -119 + bob * .35;
   const characterScale = getCharacterScale();
+  const sleepBob = person.sleeping ? Math.sin(performance.now() / 460) * 1.3 : 0;
 
   ctx.save();
   const coughShake = person.coughing ? Math.sin(performance.now() / 65) * 2.5 : 0;
-  ctx.translate(x + coughShake, y);
+  ctx.translate(x + coughShake, y + sleepBob);
   if (person.coughing) ctx.rotate(-.1);
   if (person.rotation) ctx.rotate(person.rotation);
-  ctx.scale(1.18 * characterScale, 1.3 * characterScale);
+  const personScale = person.scale || 1;
+  ctx.scale(1.18 * characterScale * personScale, 1.3 * characterScale * personScale);
   ellipse(0, 0, 18, 5, "rgba(47,64,43,.16)");
   const drawLimb = (x1, y1, length, thickness, color, angle, endColor) => {
     ctx.save();
@@ -996,16 +1143,38 @@ function drawCharacter(person) {
     line([[13, -91 + bob], [8, -79 + bob], [3, -75 + bob]], colors.top, 7);
     ellipse(-3, -75 + bob, 3.2, 3, colors.skin);
     ellipse(3, -75 + bob, 3.2, 3, colors.skin);
-  } else if (!person.coughing && !person.vaping && !person.offeringVape) {
+  } else if (!person.coughing && !person.vaping && !person.offeringVape && !person.holdingVape) {
     drawLimb(-13, -91 + bob, 35, 9, colors.topShade, -armSwing, colors.skin);
     drawLimb(13, -91 + bob, 35, 9, colors.topShade, armSwing, colors.skin);
   } else if (person.vaping) {
     drawLimb(-13, -91 + bob, 35, 9, colors.topShade, -armSwing, colors.skin);
+  } else if (person.holdingVape) {
+    drawLimb(-13, -91 + bob, 35, 9, colors.topShade, -armSwing, colors.skin);
+    line([[13, -91 + bob], [17, -84 + bob], [19, -76 + bob]], colors.topShade, 9);
+    line([[13, -91 + bob], [17, -84 + bob], [19, -76 + bob]], colors.top, 7);
+    ellipse(19, -76 + bob, 4, 3.5, colors.skin);
+    ctx.save();
+    ctx.translate(21, -84 + bob);
+    ctx.rotate(.14);
+    roundedRect(-2.2, -7, 4.4, 14, 1.5, "#3d494a");
+    roundedRect(-1.3, -5, 2.6, 3, 1, "#8ca4a0");
+    roundedRect(-1.3, 4, 2.6, 2, 1, "#d5a96f");
+    ctx.restore();
   } else if (person.offeringVape) {
     drawLimb(-13, -91 + bob, 35, 9, colors.topShade, -armSwing, colors.skin);
   }
   roundedRect(-2, -95 + bob, 4, 33, 2, "rgba(255,255,255,.15)");
   line([[-7, -96 + bob], [0, -88 + bob], [7, -96 + bob]], "rgba(255,244,218,.7)", 1.5);
+  if (person.type === "studentOne") {
+    line([[-7, -96 + bob], [-2, -88 + bob], [-7, -79 + bob]], "#d8d1bd", 2);
+    line([[7, -96 + bob], [2, -88 + bob], [7, -79 + bob]], "#d8d1bd", 2);
+    [-78, -70].forEach((buttonY) => ellipse(0, buttonY + bob, 1, 1, "#e5d7b1"));
+  } else if (person.type === "studentTwo") {
+    line([[-7, -96 + bob], [0, -90 + bob], [7, -96 + bob]], "#f0d7c3", 2.4);
+    line([[0, -90 + bob], [0, -78 + bob]], "#f0d7c3", 1.5);
+    roundedRect(4, -82 + bob, 5, 6, 1, colors.topShade);
+    line([[5, -81 + bob], [8, -81 + bob]], "#f0d7c3", 1);
+  }
   if (person.holdingBrochure) {
     roundedRect(-8, -85 + bob, 16, 19, 2, "#f3eee1");
     line([[-5, -81 + bob], [5, -81 + bob]], "#829b88", 1.2);
@@ -1017,9 +1186,9 @@ function drawCharacter(person) {
   ellipse(-16.5, headY + 1, 2.5, 4, colors.skin);
   ellipse(16.5, headY + 1, 2.5, 4, colors.skin);
 
-  const look = isPlayer ? player.direction : player.x < x ? "left" : "right";
+  const look = isPlayer ? player.direction : person.look || (player.x < x ? "left" : "right");
   const eyeShift = look === "left" ? -1 : look === "right" ? 1 : 0;
-  const worried = person.coughing || person.concerned || person.sad || (isPlayer && sceneIndex === 1);
+  const worried = person.coughing || person.concerned || person.sad || person.serious || (isPlayer && sceneIndex === 1);
   const blink = Math.sin(performance.now() / 1700 + x) > .994;
   ctx.fillStyle = colors.hair;
   ctx.beginPath();
@@ -1035,7 +1204,19 @@ function drawCharacter(person) {
   }
   ctx.closePath();
   ctx.fill();
-  if (person.type !== "you") {
+  if (person.type === "studentOne") {
+    line([[-15, headY - 4], [-16, headY + 8], [-15, headY + 18]], colors.hair, 4);
+    line([[15, headY - 4], [16, headY + 8], [15, headY + 18]], colors.hair, 4);
+    line([[-12, headY - 12], [-6, headY - 9], [0, headY - 12], [6, headY - 9], [12, headY - 11]], colors.hair, 3);
+    line([[-15, headY + 5], [-12, headY + 9], [-15, headY + 13]], colors.hairLight, 1.4);
+    line([[15, headY + 5], [12, headY + 9], [15, headY + 13]], colors.hairLight, 1.4);
+  } else if (person.type === "studentTwo") {
+    line([[-15, headY - 4], [-15, headY + 4]], colors.hair, 3.5);
+    line([[15, headY - 4], [15, headY + 4]], colors.hair, 3.5);
+    [-9, -4, 1, 6, 11].forEach((curlX, index) => {
+      ellipse(curlX, headY - (index % 2 === 0 ? 19 : 21), 1.5, 1.8, colors.hairLight);
+    });
+  } else if (person.type !== "you") {
     line([[-15, headY - 4], [-15, headY + 10]], colors.hair, 4);
     line([[15, headY - 4], [15, headY + 10]], colors.hair, 4);
   }
@@ -1082,7 +1263,13 @@ function drawCharacter(person) {
     ctx.lineTo(2, eyeY);
     ctx.stroke();
   }
-  if (worried) {
+  if (person.serious) {
+    line([[-3, headY + 11], [3, headY + 11]], "#965e50", 1.5);
+  } else if (person.sleeping) {
+    line([[-3, headY + 11], [3, headY + 11]], "#965e50", 1.2);
+  } else if (person.talking && Math.sin(performance.now() / 95) > 0) {
+    ellipse(0, headY + 11, 2.2, 3.2, "#965e50");
+  } else if (worried) {
     ctx.strokeStyle = "#965e50";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -1142,6 +1329,16 @@ function drawCharacter(person) {
     line([[-27, headY + 16], [-33, headY + 14]], "#d8edf0", 2);
   }
   ctx.restore();
+  if (person.sleeping) {
+    const zRise = (performance.now() / 850 % 1) * 14;
+    ctx.save();
+    ctx.globalAlpha = 1 - zRise / 18;
+    ctx.fillStyle = "#617f76";
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Z", x - 126 - zRise * .45, y - 18 - zRise);
+    ctx.restore();
+  }
 }
 
 function updateInteraction() {
@@ -1444,12 +1641,12 @@ function openDialogue() {
     ]
     : sceneIndex === 1 && bathroomPhase === "councillors" && storyChoices.goodEndingRoute
     ? [
-      { speaker: "Narration", text: "After school, you walk to the washroom with Pickles, still trying to understand why people treat vapes like a big deal if they're just flavored devices. Suddenly, the washroom door swings open and two older student councillors walk in, talking about a major anti-vaping assembly they are organizing." },
+      { speaker: "Narration", text: "After school, you walk to the washroom hallway with Pickles as he has the urge to vape. You and Pickle went to individual cubicles. Suddenly, the washroom door swings open and two older student walking in, talking panickily about a major anti-vaping assembly the school are organizing." },
       { speaker: "You", text: "Excuse me—we were just talking about vapes. Are they actually illegal outside of school too?", mood: "curious" },
       { speaker: "Student Councillor 1", text: "Completely illegal in Singapore—using, buying, or even owning one is banned. Around 800 students were referred to the Health Sciences Authority (HSA) for vaping offences in 2022 alone.", mood: "concerned" },
       { speaker: "Student Councillor 2", text: "And the penalties for anyone supplying them are huge. Anyone caught selling, importing, or distributing e-vaporisers for the first time faces a fine of up to S$10,000, up to six months in jail, or both.", mood: "worried" },
       { speaker: "Student Councillor 1", text: "It’s not just here, either. In December 2023, the World Health Organisation urged governments to take urgent action to control e-cigarettes and ban flavored vapes to protect young people.", mood: "concerned" },
-      { speaker: "Narration", text: "Your eyes widen—you had no idea it carried actual jail time and massive fines. Pickles looks rattled too and quickly drops the subject as the councillors walk away." }
+      { speaker: "Narration", text: "Your eyes widen—you had no idea it carried actual jail time and massive fines. Pickles looks rattled too and quickly drops the subject as the councillors walk away.", thought: true }
     ]
     : sceneIndex === 2 && storyChoices.goodEndingRoute
     ? [
@@ -1485,6 +1682,14 @@ function renderDialoguePage() {
   const scene = scenes[sceneIndex];
   const dialoguePages = choiceAftermath || currentDialogue;
   const page = dialoguePages[dialoguePageIndex];
+  const bathroomExitPage = sceneIndex === 1
+    && bathroomPhase === "councillors"
+    && ((page.speaker === "Narration" && page.text === bathroomExitNarration)
+      || (page.speaker === "You" && page.text === bathroomAftermathNarration));
+  bathroomExitStartedAt = bathroomExitPage ? performance.now() : null;
+  const bathroomDialogue = sceneIndex === 1 && bathroomPhase === "councillors";
+  worldWrap.classList.toggle("bathroom-dialogue", bathroomDialogue);
+  visualNovelStage.setAttribute("aria-hidden", String(bathroomDialogue));
   const isLastPage = !choiceAftermath && dialoguePageIndex === dialoguePages.length - 1;
   const showChoices = isLastPage
     && (sceneIndex !== 1 || bathroomPhase === "pickles")
@@ -1508,6 +1713,8 @@ function renderDialoguePage() {
   ).length;
   visualNovelStage.dataset.castCount = String(castCount);
   speakerName.textContent = page.speaker;
+  dialogue.classList.toggle("narration-dialogue", page.speaker === "Narration");
+  dialogue.classList.toggle("thought-dialogue", page.thought === true);
   vnCharacters.forEach((character) => {
     const identity = character.dataset.character;
     const isSpeaking = identity === speakingIdentity;
@@ -1587,6 +1794,7 @@ function renderDialoguePage() {
   window.requestAnimationFrame(alignPortraitWithDialogue);
   const nextButton = dialogueContent.querySelector("[data-dialogue-next]");
   if (nextButton && dialogueTypingTimer) nextButton.setAttribute("aria-label", "Show full dialogue text");
+  if (bathroomDialogue) nextButton?.focus({ preventScroll: true });
   dialogueContent.querySelector("[data-dialogue-previous]")?.addEventListener("click", () => {
     if (dialoguePageIndex === 0) return;
     dialoguePageIndex -= 1;

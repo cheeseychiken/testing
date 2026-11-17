@@ -237,7 +237,6 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 
 .vn-background-school { display: block; }
-
 .visual-novel-stage[data-setting="bedroom"] .vn-background-school,
 .visual-novel-stage[data-setting="bathroom"] .vn-background-school,
 .visual-novel-stage[data-setting="home"] .vn-background-school,
@@ -340,6 +339,9 @@ button { -webkit-tap-highlight-color: transparent; }
 .world-wrap.visual-novel #world {
   visibility: hidden;
 }
+
+.world-wrap.visual-novel.bathroom-dialogue #world { visibility: visible; }
+.world-wrap.visual-novel.bathroom-dialogue .visual-novel-stage { opacity: 0; }
 
 .world-wrap.visual-novel .visual-novel-stage { opacity: 1; }
 .world-wrap.visual-novel .interaction-prompt,
@@ -745,6 +747,40 @@ button { -webkit-tap-highlight-color: transparent; }
   border-radius: 18px;
   background: #fffaf0;
   box-shadow: 0 8px 24px rgba(55, 48, 39, .16);
+}
+
+#dialogue.narration-dialogue {
+  background: #eaf3f7;
+}
+
+#dialogue.thought-dialogue {
+  overflow: hidden auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 24px 40px 26px;
+}
+
+#dialogue.thought-dialogue > * {
+  position: relative;
+  z-index: 1;
+}
+
+#dialogue.thought-dialogue::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  background: url("./thought-cloud.svg") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 8px 14px rgba(55,48,39,.12));
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  #dialogue.thought-dialogue {
+    padding: 18px 30px 22px;
+  }
 }
 
 .world-wrap.visual-novel .dialogue.has-choices { max-height: 62%; }
